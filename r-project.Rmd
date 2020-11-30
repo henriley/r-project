@@ -1,0 +1,56 @@
+---
+title: "r-project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Group Project
+
+## Import Packages
+
+```{r}
+library("ggplot2")
+```
+
+## Importing Data
+
+```{r}
+# Reading in the sample CSV of rider data we made
+rider_2019_sample <- read.csv('sample.csv', stringsAsFactors = TRUE)
+head(rider_2019_sample)
+
+# Reading in the weather data set
+weather_data <- read.csv('NYCWeather2019.csv', stringsAsFactors = TRUE)
+head(weather_data)
+```
+
+## Initial Data Summary
+
+```{r}
+#Initial summary of data sets
+str(rider_2019_sample)
+summary(rider_2019_sample)
+
+str(weather_data)
+summary(rider_2019_sample)
+```
+
+## Initial Data Analysis
+
+### Gender Split in Riders
+
+```{r}
+# Reclassifying the genders
+# 0=unknown, 1=male, 2=female
+rider_2019_sample$gender <- ifelse(rider_2019_sample$gender == 0, "Unkown",
+                                  ifelse(rider_2019_sample$gender == 1, "Male", "Female"))
+
+# Seeing the split of genders who rented bikes
+gender_split <- ggplot(rider_2019_sample, aes(x=gender)) + geom_bar()
+gender_split
+```
+
+
