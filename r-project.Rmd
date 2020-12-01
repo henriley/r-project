@@ -1,6 +1,11 @@
 ---
 title: "r-project"
-output: html_document
+author: "Riley Maher, Griffin Rubin, Katie Summers, Natalie Vadasz"
+date: "Dec 8, 2020"
+output: 
+  html_document: 
+    toc: yes
+    toc_float: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -30,13 +35,17 @@ head(weather_data)
 ## Initial Data Summary
 
 ```{r}
-#Initial summary of data sets
+# Initial summary of rider data set
 str(rider_2019_sample)
 summary(rider_2019_sample)
+```
 
+```{r}
+# Initial summart of weather data set
 str(weather_data)
 summary(rider_2019_sample)
 ```
+
 
 ## Initial Data Analysis
 
@@ -53,4 +62,51 @@ gender_split <- ggplot(rider_2019_sample, aes(x=gender)) + geom_bar()
 gender_split
 ```
 
+### Subscriber vs Customer for Riders
+
+```{r}
+# Seeing the split of user type who rented bikes
+subscriber_split <- ggplot(rider_2019_sample, aes(x=usertype)) + geom_bar()
+subscriber_split
+```
+
+### Trip Duration
+***WE NEED TO DO SOMETHINF WITH THE OUTLIERS. REALLY SKEWING DATA
+
+```{r}
+# Average length of a bike ride
+duration_mean <- mean(rider_2019_sample$tripduration, na.rm=TRUE)
+duration_mean
+
+# Standard deviation of bike rides
+duration_sd <- sd(rider_2019_sample$tripduration, na.rm=TRUE)
+duration_sd
+
+# Range of all bike rides
+duration_range <- range(rider_2019_sample$tripduration, na.rm=TRUE)
+duration_range
+```
+
+### Types of Weather per Month
+
+```{r}
+# Creating columns of just month, day, and year
+weather_data$DATE <- as.Date(weather_data$DATE, format = "%m-%d-%Y")
+weather_data$Month <- format(weather_data$DATE, "%m")
+weather_data$Day <- format(weather_data$DATE, "%d")
+weather_data$Year <- format(weather_data$DATE, "%Y")
+```
+
+
+```{r}
+# Average precipitation per month
+percip_per_month <- tapply(weather_data$PRCP, weather_data$Month, mean, na.rm=TRUE)
+percip_per_month
+```
+
+```{r}
+# Average snow per month
+snow_per_month <- tapply(weather_data$SNOW, weather_data$Month, mean, na.rm=TRUE)
+snow_per_month
+```
 
