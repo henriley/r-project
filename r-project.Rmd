@@ -129,8 +129,14 @@ wind_per_month
 ## Distance Between Stations
 
 ```{r}
-# distm(c(rider_2019_sample$start.station.longitude, rider_2019_sample$start.station.latitude),
-#       c(rider_2019_sample$end.station.longitude, rider_2019_sample$end.station.latitude),
-#       fun = distHaversine)
+# Disatnce between start and end station in Meters
+
+rider_2019_sample <- mutate(rider_2019_sample, 
+                            distance = distHaversine(cbind(rider_2019_sample$start.station.longitude,
+                                                           rider_2019_sample$start.station.latitude),
+                                                     cbind(rider_2019_sample$end.station.longitude,
+                                                           rider_2019_sample$end.station.latitude)))
+
+rider_2019_sample
 ```
 
