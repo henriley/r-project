@@ -68,16 +68,18 @@ rider_2019_sample$gender <- ifelse(rider_2019_sample$gender == 0, "Unkown",
                                   ifelse(rider_2019_sample$gender == 1, "Male", "Female"))
 
 # Seeing the split of genders who rented bikes
-gender_split <- ggplot(rider_2019_sample, aes(x=gender)) + geom_bar()
-gender_split
+rider_2019_sample %>%
+  ggplot(aes(x=gender)) +
+  geom_bar()
 ```
 
 ### Subscriber vs Customer for Riders
 
 ```{r}
 # Seeing the split of user type who rented bikes
-subscriber_split <- ggplot(rider_2019_sample, aes(x=usertype)) + geom_bar()
-subscriber_split
+rider_2019_sample %>%
+  ggplot(aes(x=usertype)) +
+  geom_bar()
 ```
 
 ### Trip Duration
@@ -110,26 +112,28 @@ weather_data$Year <- format(weather_data$DATE, "%Y")
 
 ```{r}
 # Average precipitation per month
-percip_per_month <- tapply(weather_data$PRCP, weather_data$Month, mean, na.rm=TRUE)
-percip_per_month
+weather_data %>% 
+  summarise(average_precip = tapply(PRCP, Month, mean, na.rm=TRUE))
 ```
 
 ```{r}
 # Average snow per month
-snow_per_month <- tapply(weather_data$SNOW, weather_data$Month, mean, na.rm=TRUE)
-snow_per_month
+weather_data %>% 
+  summarise(avg_snow = tapply(SNOW, Month, mean, na.rm=TRUE))
 ```
 
 ```{r}
 # Average wind speed per month
-wind_per_month <- tapply(weather_data$AWND, weather_data$Month, mean, na.rm=TRUE)
-wind_per_month
+weather_data %>%
+  summarise(average_wind_speed = tapply(AWND, Month, mean, na.rm=TRUE))
 ```
 
-## Distance Between Stations
+## Exploratory Data Analysis
+
+### Distance Between Stations
 
 ```{r}
-# Disatnce between start and end station in Meters
+# Distance between start and end station in Meters
 
 rider_2019_sample <- mutate(rider_2019_sample, 
                             distance = distHaversine(cbind(rider_2019_sample$start.station.longitude,
@@ -137,6 +141,45 @@ rider_2019_sample <- mutate(rider_2019_sample,
                                                      cbind(rider_2019_sample$end.station.longitude,
                                                            rider_2019_sample$end.station.latitude)))
 
-rider_2019_sample
+head(rider_2019_sample)
+```
+
+```{r}
+# Speed of the rider
+
+rider_2019_sample$speed <- rider_2019_sample$distance/rider_2019_sample$tripduration
+
+# Average speed of all riders
+rider_2019_sample %>%
+  summarise(average_speed = mean(speed))
+
+# Average speed of young riders
+rider_2019_sample %>%
+  filter(age <= 45) %>%
+  summarise(young_average = mean(speed))
+
+# Average speed of old riders
+rider_2019_sample %>%
+  filter(age >= 65) %>%
+  summarise(old_average = mean(speed))
+
+# Average speed of female riders
+rider_2019_sample %>%
+  filter(gender == "Female") %>%
+  summarise(female_average = mean(speed))
+
+# Average speed of male riders
+rider_2019_sample %>%
+  filter(gender == "Male") %>%
+  summarise(male_average = mean(speed))
+```
+
+```{r}
+# Scatter Plot of speed by age
+
+rider_2019_sample %>%
+  ggplot(aes(x = speed, y = age)) +
+  geom_point() +
+  labs(title="Average Speed of Riders by Age", x="Speed", y="Age")
 ```
 
