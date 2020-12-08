@@ -138,15 +138,51 @@ weather_data %>%
 
 ## Exploratory Data Analysis - Weather Effects
 
-# NOTE: I left start.station.id in as a means to check that the merge operated properly and didn't just repeat the incorrect data. Compare this to the other data frames we've created to see if the data matches up. I have, and it looks ok, but another set of fresh eyes should also check. --Riley
-
 ```{r}
 # Combining data frames to compare data
 edited_weather <- select(weather_data, PRCP, SNOW, AWND, DATE)
-edited_rider <- select(rider_2019_sample, start.station.id, tripduration, DATE)
+edited_rider <- select(rider_2019_sample, age, tripduration, DATE)
 
 total_data = merge(edited_weather, edited_rider, by.x="DATE", by.y="DATE", all.x=TRUE)
 head(total_data)
+```
+
+### Average Precipitation by Age
+
+```{r}
+# Mean PRCP by Age of Rider
+
+total_data %>% 
+  group_by(age) %>%
+  summarise(mean_PRCP_by_age = mean(PRCP)) %>%
+  ggplot(aes(x = age, y = mean_PRCP_by_age)) + geom_line() + geom_smooth() 
+```
+
+### Average Wind by Age
+
+```{r}
+# Mean Wind by Age of Rider
+
+total_data %>% 
+  group_by(age) %>%
+  summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE)) %>%
+  ggplot(aes(x = age, y = mean_AWND_by_age)) + geom_line() + geom_smooth() 
+```
+
+## Precipitation Effects on Trip Duration
+
+```{r}
+# Average ride time when it's raining
+
+total_data %>%
+  filter(PRCP > 0) %>%
+  summarise(prcp_duration_mean = mean(tripduration))
+
+total_data %>%
+  filter(PRCP > 0) %>%
+  ggplot(aes(x = tripduration)) +
+  geom_bar()
+  
 ```
 
 ## Exploratory Data Analysis - Ride History
