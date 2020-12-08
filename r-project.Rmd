@@ -110,10 +110,11 @@ weather_data$Year <- format(weather_data$DATE, "%Y")
 ```
 
 ```{r}
+# Creating columns of just month, day, and year
 rider_2019_sample$DATE <- as.Date(rider_2019_sample$starttime, format = "%Y-%m-%d")
-rider_2019_sample$Month <- format(rider_2019_sample$Date, "%m")
-rider_2019_sample$Day <- format(rider_2019_sample$Date, "%d")
-rider_2019_sample$Year <- format(rider_2019_sample$Date, "%Y")
+rider_2019_sample$Month <- format(rider_2019_sample$DATE, "%m")
+rider_2019_sample$Day <- format(rider_2019_sample$DATE, "%d")
+rider_2019_sample$Year <- format(rider_2019_sample$DATE, "%Y")
 ```
 
 ### Types of Weather per Month
@@ -151,7 +152,6 @@ head(total_data)
 
 ```{r}
 # Mean PRCP by Age of Rider
-
 total_data %>% 
   group_by(age) %>%
   summarise(mean_PRCP_by_age = mean(PRCP)) %>%
@@ -162,7 +162,6 @@ total_data %>%
 
 ```{r}
 # Mean Wind by Age of Rider
-
 total_data %>% 
   group_by(age) %>%
   summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE)) %>%
@@ -173,16 +172,75 @@ total_data %>%
 
 ```{r}
 # Average ride time when it's raining
-
 total_data %>%
   filter(PRCP > 0) %>%
   summarise(prcp_duration_mean = mean(tripduration))
 
+total_data %>% 
+  filter(PRCP > 0) %>%
+  ggplot(aes(x = tripduration)) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white") +
+  geom_density(alpha=.2, fill="#FF6666") 
+
 total_data %>%
   filter(PRCP > 0) %>%
   ggplot(aes(x = tripduration)) +
-  geom_bar()
-  
+  geom_density(aes(fill=factor(PRCP)), alpha=0.8)
+
+total_data %>%
+  filter(PRCP > 0) %>%
+  ggplot(aes(x = tripduration)) +
+  geom_histogram()
+```
+
+### Snow Effects on Trip Duration
+
+```{r}
+# Average ride time when it's snowing
+total_data %>%
+  filter(SNOW > 0) %>%
+  summarise(snow_duration_mean = mean(tripduration))
+
+total_data %>% 
+  filter(SNOW > 0) %>%
+  ggplot(aes(x = tripduration)) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white") +
+  geom_density(alpha=.2, fill="#FF6666") 
+
+total_data %>%
+  filter(SNOW > 0) %>%
+  ggplot(aes(x = tripduration)) +
+  geom_density(aes(fill=factor(SNOW)), alpha=0.8)
+
+total_data %>%
+  filter(SNOW > 0) %>%
+  ggplot(aes(x = tripduration)) +
+  geom_histogram()
+```
+
+### Wind Effects on Trip Duration
+
+```{r}
+# Average ride time when it's windy
+total_data %>%
+  filter(AWND > 0) %>%
+  summarise(wind_duration_mean = mean(tripduration))
+
+total_data %>% 
+  filter(AWND > 0) %>%
+  ggplot(aes(x = tripduration)) + 
+  geom_histogram(aes(y=..density..), colour="black", fill="white") +
+  geom_density(alpha=.2, fill="#FF6666") 
+
+total_data %>%
+  filter(AWND > 0) %>%
+  ggplot(aes(x = tripduration)) +
+  geom_density(aes(fill=factor(AWND)), alpha=0.8)
+
+total_data %>%
+  filter(AWND > 0) %>%
+  ggplot(aes(x = tripduration)) +
+  geom_histogram()
 ```
 
 ## Exploratory Data Analysis - Ride History
@@ -191,7 +249,6 @@ total_data %>%
 
 ```{r}
 # Distance between start and end station in Meters
-
 rider_2019_sample <- mutate(rider_2019_sample, 
                             distance = distHaversine(cbind(rider_2019_sample$start.station.longitude,
                                                            rider_2019_sample$start.station.latitude),
@@ -201,9 +258,10 @@ rider_2019_sample <- mutate(rider_2019_sample,
 head(rider_2019_sample)
 ```
 
+### Speed of Rider Demographics
+
 ```{r}
 # Speed of the rider
-
 rider_2019_sample$speed <- rider_2019_sample$distance/rider_2019_sample$tripduration
 
 # Average speed of all riders
@@ -229,15 +287,40 @@ rider_2019_sample %>%
 rider_2019_sample %>%
   filter(gender == "Male") %>%
   summarise(male_average = mean(speed))
+
+# Average speed of subscribers
+rider_2019_sample %>%
+  filter(usertype == "Customer") %>%
+  summarise(customer_average = mean(speed))
+
+# Average speed of customers
+rider_2019_sample %>%
+  filter(usertype == "Subscriber") %>%
+  summarise(subscriber_average = mean(speed))
 ```
 
 ```{r}
 # Scatter Plot of speed by age
-
 rider_2019_sample %>%
-  ggplot(aes(x = speed, y = age)) +
+  ggplot(aes(x = age, y = speed)) +
   geom_point(alpha = .25, color = 'blue', size = 1) +
   geom_point(shape = 1, size = 1, colour = "black") +
   labs(title="Average Speed of Riders by Age", x="Speed", y="Age")
+```
+
+```{r}
+# Boxplot of speed by gender
+rider_2019_sample %>%
+  ggplot(aes(x = gender, y = speed)) +
+  geom_boxplot() +
+  labs(title="Speed of Riders by Gender", x="Gender", y="Speed")
+```
+
+```{r}
+# Boxplot of speed by customer type
+rider_2019_sample %>%
+  ggplot(aes(x = usertype, y = speed)) +
+  geom_boxplot() +
+  labs(title="Speed of Riders by Customer Type", x="Customer Type", y="Speed")
 ```
 
