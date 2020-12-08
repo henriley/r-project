@@ -1,0 +1,53 @@
+###Input the data and clean it
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+citibike <- read.csv("Annual_Random_Sample_Data_Set.csv", stringsAsFactors = TRUE)
+citibike$age<- 2019 - as.numeric(as.character(citibike$birth.year))
+citibike <- filter(citibike, na.rm =TRUE)
+citibike <- filter(citibike, age <= 80)
+citibike <- filter(citibike, tripduration <= 3000)
+citibike$DATE <- as.Date(citibike$starttime, format = "%Y-%m-%d")
+citibike$Month <- format(citibike$DATE, "%m")
+citibike$Day <- format(citibike$DATE, "%d")
+citibike$Year <- format(citibike$DATE, "%Y")
+```
+
+```{r}
+weather <- read.csv('NYCWeather2019.csv', stringsAsFactors = TRUE)
+weather$DATE <- as.Date(weather$DATE, format = "%m/%d/%Y")
+weather$Month <- format(weather$DATE, "%m")
+weather$Day <- format(weather$DATE, "%d")
+weather$Year <- format(weather$DATE, "%Y")
+```
+
+###Merge the rider and weather data by date
+```{r}
+edited_weather <- select(weather, PRCP, SNOW, AWND, DATE)
+edited_rider <- select(citibike, age, tripduration, DATE)
+total_data = merge(edited_weather, edited_rider, by.x="DATE", by.y="DATE", all.x=TRUE)
+head(total_data)
+
+###Average Precipitation by Age, size of point= Trip duration
+```{r}
+Plotdata <- total_data %>% 
+  group_by(age) %>%
+  summarise(mean_PRCP_by_age = mean(PRCP),
+            mean_duration = mean(tripduration)) 
+Plotdata
+  ggplot(Plotdata, aes(x = age, y = mean_PRCP_by_age)) 
+  + geom_point(alpha =0.9, shape = 18, colour = "blue", size = Plotdata$mean_duration/150) 
+  + geom_smooth(colour = "orange") 
+```
+###Average Wind by Age, Size of point = Trip duration
+```{r}
+Plotdata2 <- total_data %>% 
+  group_by(age) %>%
+   summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE),
+            mean_duration = mean(tripduration)) 
+Plotdata2
+  ggplot(Plotdata2, aes(x = age, y = mean_AWND_by_age)) 
+  + geom_point(alpha =0.9, shape = 18, colour = "blue", size = Plotdata$mean_duration/150) 
+  + geom_smooth(colour = "orange") 
+```
