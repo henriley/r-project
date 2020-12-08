@@ -99,7 +99,7 @@ duration_sd <- sd(rider_2019_sample$tripduration, na.rm=TRUE)
 duration_sd
 ```
 
-### Types of Weather per Month
+### Adjusting Dates in Data Sets
 
 ```{r}
 # Creating columns of just month, day, and year
@@ -109,6 +109,14 @@ weather_data$Day <- format(weather_data$DATE, "%d")
 weather_data$Year <- format(weather_data$DATE, "%Y")
 ```
 
+```{r}
+rider_2019_sample$DATE <- as.Date(rider_2019_sample$starttime, format = "%Y-%m-%d")
+rider_2019_sample$Month <- format(rider_2019_sample$Date, "%m")
+rider_2019_sample$Day <- format(rider_2019_sample$Date, "%d")
+rider_2019_sample$Year <- format(rider_2019_sample$Date, "%Y")
+```
+
+### Types of Weather per Month
 
 ```{r}
 # Average precipitation per month
@@ -128,7 +136,20 @@ weather_data %>%
   summarise(average_wind_speed = tapply(AWND, Month, mean, na.rm=TRUE))
 ```
 
-## Exploratory Data Analysis
+## Exploratory Data Analysis - Weather Effects
+
+# NOTE: I left start.station.id in as a means to check that the merge operated properly and didn't just repeat the incorrect data. Compare this to the other data frames we've created to see if the data matches up. I have, and it looks ok, but another set of fresh eyes should also check. --Riley
+
+```{r}
+# Combining data frames to compare data
+edited_weather <- select(weather_data, PRCP, SNOW, AWND, DATE)
+edited_rider <- select(rider_2019_sample, start.station.id, tripduration, DATE)
+
+total_data = merge(edited_weather, edited_rider, by.x="DATE", by.y="DATE", all.x=TRUE)
+head(total_data)
+```
+
+## Exploratory Data Analysis - Ride History
 
 ### Distance Between Stations
 
@@ -179,7 +200,8 @@ rider_2019_sample %>%
 
 rider_2019_sample %>%
   ggplot(aes(x = speed, y = age)) +
-  geom_point() +
+  geom_point(alpha = .25, color = 'blue', size = 1) +
+  geom_point(shape = 1, size = 1, colour = "black") +
   labs(title="Average Speed of Riders by Age", x="Speed", y="Age")
 ```
 
