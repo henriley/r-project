@@ -1,0 +1,61 @@
+---
+title: "TO404Final_1.2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Impact of weather on age distribution
+Do younger people ride more on rainy days?
+Line graph with the x-axis being customer/subscriber’s age 
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+citibike <- read.csv("Annual_Random_Sample_Data_Set.csv", stringsAsFactors = TRUE)
+citibike$age<- 2019 - as.numeric(as.character(citibike$birth.year))
+citibike <- filter(citibike, age <= 80)
+citibike <- filter(citibike, tripduration <= 3000)
+citibike$date <- format(as.POSIXct(citibike$starttime), format = "%Y-%m-%d")
+```
+
+```{r}
+weather$date <- as.Date(weather$DATE, format = "%m/%d/%Y")
+weather$Month <- format(weather$date, "%m")
+weather$Day <- format(weather$date, "%d")
+weather$Year <- format(weather$date, "%Y")
+
+citibike$DATE <- as.Date(citibike$starttime, format = "%Y-%m-%d")
+citibike$Month <- format(citibike$Date, "%m")
+citibike$Day <- format(citibike$Date, "%d")
+citibike$Year <- format(citibike$Date, "%Y")
+```
+
+###Merge the rider and weather data by date
+```{r}
+edited_weather <- select(weather, PRCP, SNOW, AWND, DATE)
+edited_rider <- select(citibike, start.station.id, age, tripduration, DATE)
+total_data = merge(edited_weather, edited_rider, by.x="DATE", by.y="DATE", all.x=TRUE)
+```
+
+###Average Precipitation by Age
+```{r}
+###Mean PRCP by Age of Rider
+rain_mean <- total_data %>% 
+   group_by(age) %>%
+summarise(mean_PRCP_by_age = mean(PRCP))
+
+ggplot(rain_mean, aes(x = age, y = mean_PRCP_by_age)) + geom_line() + geom_smooth() 
+```
+
+```{r}
+###Mean Wind by Age of Rider
+wind_mean <- total_data %>% 
+   group_by(age) %>%
+summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE))
+ggplot(wind_mean, aes(x = age, y = mean_AWND_by_age)) + geom_line() + geom_smooth() 
+```
+
+
