@@ -496,7 +496,7 @@ facet_wrap(~ usertype)
 #### Start Location Preferences - by Trip Duration
 ```{r}
 ggmap(start) +
-    geom_point(data = rider_2019_sample, mapping = aes(x = start.station.longitude, y = start.station.latitude,
+    geom_point(data = total_data, mapping = aes(x = start.station.longitude, y = start.station.latitude,
                                         col = tripduration)) +
     scale_color_gradient(low = "yellow", high = "red")
 ```
