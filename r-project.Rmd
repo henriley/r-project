@@ -108,7 +108,7 @@ head(total_data)
 ```{r}
 # Reclassifying the genders
 # 0=unknown, 1=male, 2=female
-total_data$gender <- ifelse(total_data$gender == 0, "Unkown",
+total_data$gender <- ifelse(total_data$gender == 0, "Unknown",
                                   ifelse(total_data$gender == 1, "Male", "Female"))
 
 # Seeing the split of genders who rented bikes
@@ -398,25 +398,34 @@ total_data %>%
 ```{r}
 # Scatter Plot of speed by age
 total_data %>%
-  ggplot(aes(x = age, y = speed)) +
-  geom_point(alpha = .25, color = 'blue', size = 1) +
-  geom_point(shape = 1, size = 1, colour = "black") +
+  ggplot(aes(x = age, y = speed, colour = gender)) +
+  geom_point(alpha = .4, size = 1.5) +
+  scale_colour_manual(name = 'Gender',
+                      values = setNames(c('blue','magenta', 'dark green'),
+                                        c('Male', 'Female', 'Unknown'))) +
+  geom_smooth(method='lm', colour = 'black') +
   labs(title="Average Speed of Riders by Age", x="Speed", y="Age")
 ```
 
 ```{r}
 # Boxplot of speed by gender
 total_data %>%
-  ggplot(aes(x = gender, y = speed)) +
-  geom_boxplot() +
+  ggplot(aes(x = gender, y = speed, colour = gender)) +
+  geom_boxplot(outlier.colour = 'red') +
+  scale_colour_manual(name = 'Gender',
+                      values = setNames(c('blue','magenta', 'dark green'),
+                                        c('Male', 'Female', 'Unknown'))) +
   labs(title="Speed of Riders by Gender", x="Gender", y="Speed")
 ```
 
 ```{r}
 # Boxplot of speed by customer type
 total_data %>%
-  ggplot(aes(x = usertype, y = speed)) +
-  geom_boxplot() +
+  ggplot(aes(x = usertype, y = speed, colour = usertype)) +
+  geom_boxplot(outlier.colour = 'red') +
+  scale_colour_manual(name = 'User Type',
+                      values = setNames(c('purple', 'orange'),
+                                        c('Subscriber', 'Customer'))) +
   labs(title="Speed of Riders by Customer Type", x="Customer Type", y="Speed")
 ```
 
