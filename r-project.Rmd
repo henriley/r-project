@@ -21,6 +21,7 @@ library("ggplot2")
 library('dplyr')
 library('tidyverse')
 library('geosphere')
+library("ggmap")
 ```
 
 ## Importing Data
@@ -322,5 +323,129 @@ rider_2019_sample %>%
   ggplot(aes(x = usertype, y = speed)) +
   geom_boxplot() +
   labs(title="Speed of Riders by Customer Type", x="Customer Type", y="Speed")
+```
+
+### Start Locations
+
+```{r}
+top_height <- max(rider_2019_sample$start.station.latitude) - min(rider_2019_sample$start.station.latitude)
+top_width <- max(rider_2019_sample$start.station.longitude) - min(rider_2019_sample$start.station.longitude)
+top_borders <- c(bottom  = min(rider_2019_sample$start.station.latitude)  - 0.1 * top_height,
+                 top     = max(rider_2019_sample$start.station.latitude)  + 0.1 * top_height,
+                 left    = min(rider_2019_sample$start.station.longitude) - 0.2 * top_width,
+                 right   = max(rider_2019_sample$start.station.longitude) + 0.2 * top_width)
+
+start <- get_stamenmap(top_borders, zoom = 12, maptype = "toner-lite")
+start_map <- ggmap(start, extent = "device", legend = "topright")
+
+start_map + stat_density2d(
+aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..),
+size = 1, bins = 5, data = rider_2019_sample,
+geom = "polygon"
+)
+
+```
+
+
+#### Start Location Preferences - by Day of Week
+```{r}
+# convert dates to weekdays
+rider_2019_sample$day_of_week = weekdays(rider_2019_sample$DATE)
+
+start_map +
+stat_density2d(
+aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..),
+bins = 5, geom = "polygon",
+data = rider_2019_sample) +
+scale_fill_gradient(low = "black", high = "red") +
+facet_wrap(~ day_of_week)
+
+```
+
+#### Start Location Preferences - by Gender
+
+```{r}
+start_map +
+stat_density2d(
+aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..),
+bins = 5, geom = "polygon",
+data = rider_2019_sample) +
+scale_fill_gradient(low = "black", high = "red") +
+facet_wrap(~ gender)
+
+```
+
+#### Start Location Preferences - by Customer Type
+```{r}
+start_map +
+stat_density2d(
+aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..),
+bins = 5, geom = "polygon",
+data = rider_2019_sample) +
+scale_fill_gradient(low = "black", high = "red") +
+facet_wrap(~ usertype)
+
+```
+
+
+#### Start Location Preferences - by Trip Duration
+```{r}
+ggmap(start) +
+    geom_point(data = rider_2019_sample, mapping = aes(x = start.station.longitude, y = start.station.latitude,
+                                        col = tripduration)) +
+    scale_color_gradient(low = "yellow", high = "red")
+```
+
+
+
+### End Location Preferences
+```{r}
+end <- get_stamenmap(top_borders, zoom = 12, maptype = "toner-lite")
+end_map <- ggmap(end, extent = "device", legend = "topright")
+
+end_map + stat_density2d(
+aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha = ..level..),
+size = 1, bins = 5, data = rider_2019_sample,
+geom = "polygon"
+)
+```
+
+#### End Location Preferences - by Day of Week
+
+```{r}
+end_map +
+stat_density2d(
+aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha = ..level..),
+bins = 5, geom = "polygon",
+data = rider_2019_sample) +
+scale_fill_gradient(low = "black", high = "red") +
+facet_wrap(~ day_of_week)
+
+```
+
+#### End Location Preferences - by Gender
+
+```{r}
+end_map +
+stat_density2d(
+aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha = ..level..),
+bins = 5, geom = "polygon",
+data = rider_2019_sample) +
+scale_fill_gradient(low = "black", high = "red") +
+facet_wrap(~ gender)
+
+```
+
+#### End Location Preferences - by User Type
+
+```{r}
+end_map +
+stat_density2d(
+aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha = ..level..),
+bins = 5, geom = "polygon",
+data = rider_2019_sample) +
+scale_fill_gradient(low = "black", high = "red") +
+facet_wrap(~ usertype)
+
 ```
 
