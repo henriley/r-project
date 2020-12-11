@@ -91,8 +91,12 @@ edited_rider <- select(rider_2019_sample,
                        tripduration,
                        start.station.latitude,
                        start.station.longitude,
+                       start.station.id,
+                       start.station.name,
                        end.station.latitude,
                        end.station.longitude,
+                       end.station.id,
+                       end.station.name,
                        DATE,
                        Day,
                        Month,
@@ -562,5 +566,45 @@ data = total_data) +
 scale_fill_gradient(low = "black", high = "red") +
 facet_wrap(~ usertype)
 
+```
+
+
+## Asymmetrical Traffic Data 
+```{r}
+total_rides = count(total_data)
+test = total_data
+test$start.station.name = as.character(test$start.station.name)
+test$end.station.name = as.character(test$end.station.name)
+test <- test[test$start.station.name==test$end.station.name, ]
+same_station = count(test)
+
+same_station / total_rides
+```
+Only ~2.2% of rides start and end at the same station. 
+
+```{r}
+start_popularity = sort(table(total_data$start.station.name), decreasing=TRUE)
+top10 = round(length(unique(total_data$start.station.name, na.rm=TRUE))*0.1)
+top_10 = head(start_popularity, top10)
+barplot(top_10)
+top_starts = as.data.frame(top_10)
+top_10rides = sum(top_starts$Freq)
+
+top_10rides / total_rides
+
+```
+
+32.9% of bike rides start from the top 10% most used stations.
+
+inflow vs outflow (start rides / end rides) in 2019
+```{r}
+count_starts = as.data.frame(table(total_data$start.station.name))
+names(count_starts) = c("station", "starts")
+count_ends = as.data.frame(table(total_data$end.station.name))
+names(count_ends) = c("station", "ends")
+station_flow = as.data.frame(merge(count_starts, count_ends, by.x="station", by.y="station", all.x=TRUE))
+station_flow$net = station_flow$starts - station_flow$ends
+
+station_flow %>% mutate(station = fct_reorder(station, net)) %>% ggplot(aes(x=station, y=net)) + geom_point(stat = "identity")+ geom_hline(yintercept=0, linetype="dashed", color = "red")
 ```
 
