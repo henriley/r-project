@@ -115,7 +115,7 @@ total_data <- mutate(total_data,
                                                            total_data$start.station.latitude),
                                                      cbind(total_data$end.station.longitude,
                                                            total_data$end.station.latitude)))
-
+total_data <- filter(total_data, tripduration <= 3600)
 head(total_data)
 ```
 
@@ -151,94 +151,50 @@ total_data %>%
 
 ```{r}
 # Range of all bike rides
-trip_duration_stats <- filter(total_data, tripduration <= 3600) %>% 
+trip_duration_stats <- filter(total_data) %>%
+# min range of tripduration  
   summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
-  # min range of tripduration
+# max range of tripduration
             duration_range_max = max(tripduration, na.rm=TRUE), 
-  # max range of tripduration
+# average length of bike ride
             duration_mean = mean(tripduration, na.rm=TRUE), 
-  # average length of bike ride
+# standard deviation of bike ride
             duration_sd = sd(tripduration, na.rm=TRUE)) 
-  # standard deviation of bike ride
-  trip_duration_stats
   
-# duration_range <- range(total_data$tripduration, na.rm=TRUE)
-# duration_range
-# 
-# # Average length of a bike ride
-# duration_mean <- mean(total_data$tripduration, na.rm=TRUE)
-# duration_mean
-
-# Standard deviation of bike rides
-# duration_sd <- sd(total_data$tripduration, na.rm=TRUE)
-# duration_sd
-
-#trip_dration_stats <- filter(total_data, tripduration <= 3600)
-#duration_range <- range(total_data$tripduration, na.rm=TRUE)
-#duration_range
-
-# Average length of a bike ride
-# duration_mean <- mean(total_data$tripduration, na.rm=TRUE)
-# duration_mean
-
-# Standard deviation of bike rides
-# duration_sd <- sd(total_data$tripduration, na.rm=TRUE)
-# duration_sd
+trip_duration_stats
 ```
 ### Trip Duration with Rain
 
 ```{r}
 # Range of all bike rides affected by rain
-total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0) %>% 
+total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0) %>%
+# min range of tripduration 
     summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
-# min range of tripduration
-            duration_range_max = max(tripduration, na.rm=TRUE), 
 # max range of tripduration
-            duration_mean = mean(tripduration, na.rm=TRUE), 
+            duration_range_max = max(tripduration, na.rm=TRUE), 
 # average length of bike ride affected by rain
-            duration_sd = sd(tripduration, na.rm=TRUE)) 
+            duration_mean = mean(tripduration, na.rm=TRUE), 
 # standard deviation of bike ride affected by rain
+            duration_sd = sd(tripduration, na.rm=TRUE)) 
+
 total_data_rain
-
-# total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0)
-# duration_range_rain <- range(total_data_rain$tripduration, na.rm=TRUE)
-# duration_range_rain
-
-# Average length of a bike ride affected by rain
-# duration_mean_rain <- mean(total_data_rain$tripduration, na.rm=TRUE)
-# duration_mean_rain
-
-# Standard deviation of bike rides affected by rain
-# duration_sd_rain <- sd(total_data_rain$tripduration, na.rm=TRUE)
-# duration_sd_rain
 ```
 
 ### Trip Duration with Snow
 
 ```{r}
 # Range of all bike rides affected by snow
-total_data_snow <- filter(total_data, SNOW > 0) %>% 
-      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
+total_data_snow <- filter(total_data, SNOW > 0) %>%
 # min range of tripduration
-      duration_range_max = max(tripduration, na.rm=TRUE), 
+      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
 # max range of tripduration
-      duration_mean = mean(tripduration, na.rm=TRUE), 
+      duration_range_max = max(tripduration, na.rm=TRUE), 
 # average length of bike ride affected by snow
-      duration_sd = sd(tripduration, na.rm=TRUE)) 
+      duration_mean = mean(tripduration, na.rm=TRUE), 
 # standard deviation of bike ride affected by snow
+      duration_sd = sd(tripduration, na.rm=TRUE)) 
+
 total_data_snow
-
-#total_data_snow <- filter(total_data, SNOW > 0)
-#duration_range_snow <- range(total_data_snow$tripduration, na.rm=TRUE)
-#duration_range_snow
-
-# Average length of a bike ride affected by snow
-# duration_mean_snow <- mean(total_data_snow$tripduration, na.rm=TRUE)
-# duration_mean_snow
-
-# Standard deviation of bike rides affected by snow
-# duration_sd_snow <- sd(total_data_snow$tripduration, na.rm=TRUE)
-# duration_sd_snow
 ```
 
 ### Trip Duration with Wind
@@ -246,27 +202,16 @@ total_data_snow
 ```{r}
 # Range of all bike rides affected by wind
 total_data_wind <- filter(total_data, SNOW == 0, PRCP == 0, AWND > 0) %>% 
-      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
 # min range of tripduration
-      duration_range_max = max(tripduration, na.rm=TRUE), 
+      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
 # max range of tripduration
-      duration_mean = mean(tripduration, na.rm=TRUE), 
+      duration_range_max = max(tripduration, na.rm=TRUE), 
 # average length of bike ride affected by snow
-      duration_sd = sd(tripduration, na.rm=TRUE)) 
+      duration_mean = mean(tripduration, na.rm=TRUE), 
 # standard deviation of bike ride affected by snow
+      duration_sd = sd(tripduration, na.rm=TRUE)) 
+
 total_data_wind
-
-# total_data_wind <- filter(total_data, SNOW == 0, PRCP == 0, AWND > 0)
-# duration_range_wind <- range(total_data_wind$tripduration, na.rm=TRUE)
-# duration_range_wind
-
-# Average length of a bike ride affected by wind
-# duration_mean_wind <- mean(total_data_wind$tripduration, na.rm=TRUE)
-# duration_mean_wind
-
-# Standard deviation of bike rides affected by wind
-# duration_sd_wind <- sd(total_data_wind$tripduration, na.rm=TRUE)
-# duration_sd_wind
 ```
 
 ```{r}
@@ -386,25 +331,25 @@ total_data %>%
 ```{r}
 # Number of rides over average time sin weather effects
 ride_num <- total_data %>%
-  filter(tripduration > duration_mean) %>%
+  filter(tripduration > trip_duration_stats[1,3]) %>%
   count()
 ride_num[1,1]
 
 # Number of rides over average time with rain
 rain_num <- total_data %>%
-  filter(SNOW == 0, PRCP > 0, tripduration > duration_mean) %>%
+  filter(SNOW == 0, PRCP > 0, tripduration > trip_duration_stats[1,3]) %>%
   count()
 rain_num[1,1]
 
 # Number of rides over average time with snow
 snow_num <- total_data %>%
-  filter(SNOW > 0, tripduration > duration_mean) %>%
+  filter(SNOW > 0, tripduration > trip_duration_stats[1,3]) %>%
   count()
 snow_num[1,1]
 
 # Number of rides over average time with wind
 wind_num <- total_data %>%
-  filter(AWND > 0, tripduration > duration_mean) %>%
+  filter(AWND > 0, tripduration > trip_duration_stats[1,3]) %>%
   count()
 wind_num[1,1]
 ```
@@ -451,7 +396,7 @@ cust_ride <- total_data %>%
   filter(usertype == "Subscriber") %>%
   summarise(subscriber_average = mean(speed))
 
-cbind(all_ride, young_ride, old_ride, fem_ride, male_ride, sub_ride, cust_ride))
+cbind(all_ride, young_ride, old_ride, fem_ride, male_ride, sub_ride, cust_ride)
 ```
 
 ```{r}
