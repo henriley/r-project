@@ -437,12 +437,11 @@ start <- get_stamenmap(top_borders, zoom = 12, maptype = "toner-lite")
 start_map <- ggmap(start, extent = "device", legend = "topright")
 
 start_map + stat_density2d(
-aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..),
-size = 1, bins = 5, data = total_data,
-geom = "polygon"
-)
+aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..,), size = 2, bins = 10, data = total_data, geom = "polygon",  na.rm=TRUE,
+) + labs( fill = "Density", title = "Start Location Density") + guides(alpha = F)
 
 ```
+This graph shows that most bike trips in 2019 start in the center of NYC, with relatively few in the boroughs by comparison.
 
 #### Start Location Preferences - by Day of Week
 
@@ -453,25 +452,29 @@ total_data$day_of_week = weekdays(total_data$DATE)
 start_map +
 stat_density2d(
 aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..),
-bins = 5, geom = "polygon",
-data = total_data) +
-scale_fill_gradient(low = "black", high = "red") +
-facet_wrap(~ day_of_week)
+size =2, bins = 10, geom = "polygon", data = total_data) + 
+guides(alpha = F) + labs(fill = "Density", title = "Start Location Density by Day of Week") +
+scale_fill_gradient(low = "yellow", high = "red") +
+facet_wrap(~ day_of_week) + 
+theme(legend.position = "right")
 
 ```
+From these charts, we can see that the Saturday and Sunday location densities are slightly more spread than the weekdays, suggesting that the weekend trips are less concentrated in the inner city, albeit still focused in Manhattan. 
 
-#### Start Location Preferences - by Customer Type
+#### Start Location Preferences - by User Type
 
 ```{r}
 start_map +
 stat_density2d(
 aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..),
-bins = 5, geom = "polygon",
-data = total_data) +
-scale_fill_gradient(low = "black", high = "red") +
-facet_wrap(~ usertype)
+size =2, bins = 10, geom = "polygon", data = total_data) + 
+guides(alpha = F) + labs(fill = "Density", title = "Start Location Density by User Type") +
+scale_fill_gradient(low = "yellow", high = "red") +
+facet_wrap(~ usertype) + 
+theme(legend.position = "right")
 
 ```
+This graph shows that there is larger focus on downtown start locations for Subscribers, whereas Customers are spread out along Manhattan and are present in the boroughs as well.
 
 #### Start Location Preferences - by Trip Duration
 
@@ -503,13 +506,14 @@ geom = "polygon"
 end_map +
 stat_density2d(
 aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha = ..level..),
-bins = 5, geom = "polygon",
-data = total_data) +
-scale_fill_gradient(low = "black", high = "red") +
-facet_wrap(~ usertype)
+size =2, bins = 10, geom = "polygon", data = total_data) + 
+guides(alpha = F) + labs(fill = "Density", title = "End Location Density by Day of Week") +
+scale_fill_gradient(low = "yellow", high = "red") +
+facet_wrap(~ day_of_week) + 
+theme(legend.position = "right")
 
 ```
-
+We see the same pattern breakdown in the end location density as we do the start locations, suggesting that weekends have a more spread out end locations than the weekdays. 
 
 ## Asymmetrical Traffic Data 
 ```{r}
@@ -520,33 +524,53 @@ test$end.station.name = as.character(test$end.station.name)
 test <- test[test$start.station.name==test$end.station.name, ]
 same_station = count(test)
 
-same_station / total_rides
+symmetric = same_station / total_rides
+asymmetric = 1 - symmetric
 ```
-Only ~2.2% of rides start and end at the same station. 
+Only `{r} symmetric`% of rides start and end at the same station, which means that `{r} asymmetric`% of rides are asymmetric traffic.
 
 ```{r}
-start_popularity = sort(table(total_data$start.station.name), decreasing=TRUE)
+start_popularity = sort(table(total_data$start.station.name), decreasing=TRUE, na.rm=TRUE)
 top10 = round(length(unique(total_data$start.station.name, na.rm=TRUE))*0.1)
 top_10 = head(start_popularity, top10)
 barplot(top_10)
 top_starts = as.data.frame(top_10)
 top_10rides = sum(top_starts$Freq)
 
-top_10rides / total_rides
+top10_rides = top_10rides / total_rides
 
 ```
 
-32.9% of bike rides start from the top 10% most used stations.
+`{r}top10_rides` of bike rides start come from the top 10% most used station (which are:`{r} top_10`)
 
-inflow vs outflow (start rides / end rides) in 2019
 ```{r}
-count_starts = as.data.frame(table(total_data$start.station.name))
+count_starts = as.data.frame(table(total_data$start.station.name), na.rm=TRUE)
 names(count_starts) = c("station", "starts")
-count_ends = as.data.frame(table(total_data$end.station.name))
+count_ends = as.data.frame(table(total_data$end.station.name), na.rm=TRUE)
 names(count_ends) = c("station", "ends")
-station_flow = as.data.frame(merge(count_starts, count_ends, by.x="station", by.y="station", all.x=TRUE))
-station_flow$net = station_flow$starts - station_flow$ends
+station_flow = as.data.frame(merge(count_starts, count_ends, by.x="station", by.y="station", all.x=TRUE, na.rm=TRUE))
+station_flow$net = station_flow$starts / station_flow$ends
 
-station_flow %>% mutate(station = fct_reorder(station, net)) %>% ggplot(aes(x=station, y=net)) + geom_point(stat = "identity")+ geom_hline(yintercept=0, linetype="dashed", color = "red")
+station_flow = na.omit(station_flow)
+
+station_flow %>% mutate(station = fct_reorder(station, net)) %>% ggplot(aes(x=station, y=net)) + geom_bar(stat = "identity")+ geom_hline(yintercept=1, linetype="dashed", color = "red") + labs(x="Stations", y="Total Starts / Total Ends in 2019", title = "Net 2019 Flow of Bikes per Station") + theme(axis.text.x = element_blank())
+
+
 ```
+The chart above depicts each station's inflow/outflow of bikes in 2019. Those with a value greater than 1 show that they have a higher rate of bikes starting at their station than ending at their station. These stations would be important to target when thinking about rebalancing bikes, as they overall have more bikes leaving them then coming to them. Similarly, those with the lowest start/end ratios have more bikes ending at their station than leaving, making them prime candidates for moving their surplus to a station in more need.
+
+```{r}
+surplus_stations = station_flow[station_flow$net < 0.75,]
+deficit_stations = station_flow[station_flow$net > 1.25,]
+
+surplus_stations 
+deficit_stations
+
+```
+Stations with surplus:  
+`{r} surplus_stations `
+
+Stations with deficit: 
+`{r} deficit_stations `
+
 
