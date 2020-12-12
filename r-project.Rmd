@@ -131,8 +131,9 @@ total_data$gender <- ifelse(total_data$gender == 0, "Unknown",
 
 # Seeing the split of genders who rented bikes
 total_data %>%
-  ggplot(aes(x=gender)) +
-  geom_bar()
+  ggplot(aes(x=gender, fill=gender)) +
+  geom_bar() + theme(legend.position="none") +
+  ggtitle("Bike Rental Counts by Gender")
 ```
 
 ### Subscriber vs Customer for Riders
@@ -140,76 +141,144 @@ total_data %>%
 ```{r}
 # Seeing the split of user type who rented bikes
 total_data %>%
-  ggplot(aes(x=usertype)) +
-  geom_bar()
+  ggplot(aes(x=usertype, fill=usertype)) +
+  geom_bar() +
+  theme(legend.position="none") + 
+  ggtitle("Bike Rental Counts by User Type")
 ```
 
 ### Trip Duration
 
 ```{r}
 # Range of all bike rides
-total_data <- filter(total_data, tripduration <= 3600)
-duration_range <- range(total_data$tripduration, na.rm=TRUE)
-duration_range
-
-# Average length of a bike ride
-duration_mean <- mean(total_data$tripduration, na.rm=TRUE)
-duration_mean
+trip_duration_stats <- filter(total_data, tripduration <= 3600) %>% 
+  summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
+  # min range of tripduration
+            duration_range_max = max(tripduration, na.rm=TRUE), 
+  # max range of tripduration
+            duration_mean = mean(tripduration, na.rm=TRUE), 
+  # average length of bike ride
+            duration_sd = sd(tripduration, na.rm=TRUE)) 
+  # standard deviation of bike ride
+  trip_duration_stats
+  
+# duration_range <- range(total_data$tripduration, na.rm=TRUE)
+# duration_range
+# 
+# # Average length of a bike ride
+# duration_mean <- mean(total_data$tripduration, na.rm=TRUE)
+# duration_mean
 
 # Standard deviation of bike rides
-duration_sd <- sd(total_data$tripduration, na.rm=TRUE)
-duration_sd
+# duration_sd <- sd(total_data$tripduration, na.rm=TRUE)
+# duration_sd
+
+#trip_dration_stats <- filter(total_data, tripduration <= 3600)
+#duration_range <- range(total_data$tripduration, na.rm=TRUE)
+#duration_range
+
+# Average length of a bike ride
+# duration_mean <- mean(total_data$tripduration, na.rm=TRUE)
+# duration_mean
+
+# Standard deviation of bike rides
+# duration_sd <- sd(total_data$tripduration, na.rm=TRUE)
+# duration_sd
 ```
 ### Trip Duration with Rain
 
 ```{r}
 # Range of all bike rides affected by rain
-total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0)
-duration_range_rain <- range(total_data_rain$tripduration, na.rm=TRUE)
-duration_range_rain
+total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0) %>% 
+    summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
+# min range of tripduration
+            duration_range_max = max(tripduration, na.rm=TRUE), 
+# max range of tripduration
+            duration_mean = mean(tripduration, na.rm=TRUE), 
+# average length of bike ride affected by rain
+            duration_sd = sd(tripduration, na.rm=TRUE)) 
+# standard deviation of bike ride affected by rain
+total_data_rain
+
+# total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0)
+# duration_range_rain <- range(total_data_rain$tripduration, na.rm=TRUE)
+# duration_range_rain
 
 # Average length of a bike ride affected by rain
-duration_mean_rain <- mean(total_data_rain$tripduration, na.rm=TRUE)
-duration_mean_rain
+# duration_mean_rain <- mean(total_data_rain$tripduration, na.rm=TRUE)
+# duration_mean_rain
 
 # Standard deviation of bike rides affected by rain
-duration_sd_rain <- sd(total_data_rain$tripduration, na.rm=TRUE)
-duration_sd_rain
+# duration_sd_rain <- sd(total_data_rain$tripduration, na.rm=TRUE)
+# duration_sd_rain
 ```
 
 ### Trip Duration with Snow
 
 ```{r}
 # Range of all bike rides affected by snow
-total_data_snow <- filter(total_data, SNOW > 0)
-duration_range_snow <- range(total_data_snow$tripduration, na.rm=TRUE)
-duration_range_snow
+total_data_snow <- filter(total_data, SNOW > 0) %>% 
+      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
+# min range of tripduration
+      duration_range_max = max(tripduration, na.rm=TRUE), 
+# max range of tripduration
+      duration_mean = mean(tripduration, na.rm=TRUE), 
+# average length of bike ride affected by snow
+      duration_sd = sd(tripduration, na.rm=TRUE)) 
+# standard deviation of bike ride affected by snow
+total_data_snow
+
+#total_data_snow <- filter(total_data, SNOW > 0)
+#duration_range_snow <- range(total_data_snow$tripduration, na.rm=TRUE)
+#duration_range_snow
 
 # Average length of a bike ride affected by snow
-duration_mean_snow <- mean(total_data_snow$tripduration, na.rm=TRUE)
-duration_mean_snow
+# duration_mean_snow <- mean(total_data_snow$tripduration, na.rm=TRUE)
+# duration_mean_snow
 
 # Standard deviation of bike rides affected by snow
-duration_sd_snow <- sd(total_data_snow$tripduration, na.rm=TRUE)
-duration_sd_snow
+# duration_sd_snow <- sd(total_data_snow$tripduration, na.rm=TRUE)
+# duration_sd_snow
 ```
 
 ### Trip Duration with Wind
 
 ```{r}
 # Range of all bike rides affected by wind
-total_data_wind <- filter(total_data, SNOW == 0, PRCP == 0, AWND > 0)
-duration_range_wind <- range(total_data_wind$tripduration, na.rm=TRUE)
-duration_range_wind
+total_data_wind <- filter(total_data, SNOW == 0, PRCP == 0, AWND > 0) %>% 
+      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
+# min range of tripduration
+      duration_range_max = max(tripduration, na.rm=TRUE), 
+# max range of tripduration
+      duration_mean = mean(tripduration, na.rm=TRUE), 
+# average length of bike ride affected by snow
+      duration_sd = sd(tripduration, na.rm=TRUE)) 
+# standard deviation of bike ride affected by snow
+total_data_wind
+
+# total_data_wind <- filter(total_data, SNOW == 0, PRCP == 0, AWND > 0)
+# duration_range_wind <- range(total_data_wind$tripduration, na.rm=TRUE)
+# duration_range_wind
 
 # Average length of a bike ride affected by wind
-duration_mean_wind <- mean(total_data_wind$tripduration, na.rm=TRUE)
-duration_mean_wind
+# duration_mean_wind <- mean(total_data_wind$tripduration, na.rm=TRUE)
+# duration_mean_wind
 
 # Standard deviation of bike rides affected by wind
-duration_sd_wind <- sd(total_data_wind$tripduration, na.rm=TRUE)
-duration_sd_wind
+# duration_sd_wind <- sd(total_data_wind$tripduration, na.rm=TRUE)
+# duration_sd_wind
 ```
+
+```{r}
+# Combine above dataframes into one dataframe for side-by-side comparison
+dataframe_list = list("Total Data" = trip_duration_stats,
+                      "Rain Data" = total_data_rain,
+                      "Snow Data" = total_data_snow,
+                      "Wind Data" = total_data_wind)
+# Can also do rbind(trip_duration_stats, total_data_rain, etc) but this keeps source table names defined above
+do.call(rbind, dataframe_list)
+```
+
 
 ### Types of Weather per Month
 
@@ -217,19 +286,23 @@ duration_sd_wind
 # Average rain per month
 total_data %>%
   filter(SNOW == 0) %>%
-  summarise(average_rain = tapply(PRCP, Month, mean, na.rm=TRUE))
+  group_by(Month) %>% 
+  summarise(average_rain = mean(PRCP, na.rm = TRUE))
 ```
 
 ```{r}
 # Average snow per month
 total_data %>% 
-  summarise(avg_snow = tapply(SNOW, Month, mean, na.rm=TRUE))
+  group_by(Month) %>% 
+  summarise(average_snow = mean(SNOW, na.rm = TRUE))
 ```
 
 ```{r}
 # Average wind speed per month
 total_data %>%
-  summarise(average_wind_speed = tapply(AWND, Month, mean, na.rm=TRUE))
+  group_by(Month) %>% 
+  summarise(average_wind_speed = mean(AWND, na.rm = TRUE))
+# mean returns NaN if all values in group (ex: jan and feb) are NA
 ```
 
 ## Exploratory Data Analysis - Weather Effects
@@ -378,13 +451,7 @@ cust_ride <- total_data %>%
   filter(usertype == "Subscriber") %>%
   summarise(subscriber_average = mean(speed))
 
-Reduce(merge, list(all_ride,
-                   young_ride,
-                   old_ride,
-                   fem_ride,
-                   male_ride,
-                   sub_ride,
-                   cust_ride))
+cbind(all_ride, young_ride, old_ride, fem_ride, male_ride, sub_ride, cust_ride))
 ```
 
 ```{r}
@@ -396,6 +463,7 @@ total_data %>%
                       values = setNames(c('blue','magenta', 'dark green'),
                                         c('Male', 'Female', 'Unknown'))) +
   geom_smooth(method='lm', colour = 'black') +
+  facet_wrap(~gender)  + # make a plot per gender. look up facet_wrap for other fun ways to do this 
   labs(title="Average Speed of Riders by Age", x="Speed", y="Age")
 ```
 
