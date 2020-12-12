@@ -50,7 +50,7 @@ str(weather_data)
 summary(rider_2019_sample)
 ```
 
-### Adjusting Dates in Data Sets
+### Adjusting Dates and Times in Data Sets
 
 ```{r}
 # Creating columns of just month, day, and year
@@ -66,6 +66,11 @@ rider_2019_sample$DATE <- as.Date(rider_2019_sample$starttime, format = "%Y-%m-%
 rider_2019_sample$Month <- format(rider_2019_sample$DATE, "%m")
 rider_2019_sample$Day <- format(rider_2019_sample$DATE, "%d")
 rider_2019_sample$Year <- format(rider_2019_sample$DATE, "%Y")
+```
+
+```{r}
+dates <- as.POSIXct(rider_2019_sample$stoptime)
+rider_2019_sample$endtime <- format(dates, format = "%H:%M")
 ```
 
 ### Rider Age
@@ -100,7 +105,8 @@ edited_rider <- select(rider_2019_sample,
                        DATE,
                        Day,
                        Month,
-                       Year)
+                       Year,
+                       endtime)
 
 total_data = merge(edited_weather, edited_rider, by.x="DATE", by.y="DATE", all.x=TRUE)
 head(total_data)
@@ -486,7 +492,6 @@ guides(alpha = F) + labs(fill = "Density", title = "Start Location Density by Us
 scale_fill_gradient(low = "yellow", high = "red") +
 facet_wrap(~ usertype) + 
 theme(legend.position = "right")
-
 ```
 This graph shows that there is larger focus on downtown start locations for Subscribers, whereas Customers are spread out along Manhattan and are present in the boroughs as well.
 
@@ -529,15 +534,60 @@ ggmap(start) +
 ### End Location Preferences
 
 ```{r}
-## before noon and after noon
+# Creating a data frame where riders rented bikes in the morning
+morning <- total_data %>%
+  filter(endtime >= "07:00", endtime <= "12:00")
+
+# Creating a data frame where riders rented bikes in the afternoon
+afternoon <- total_data %>%
+  filter(endtime > "12:00", endtime <= "16:00")
+
+# Creating a data frame where riders rented bikes in the night
+night <- total_data %>%
+  filter(endtime > "16:00", endtime <= "20:00")
+
 end <- get_stamenmap(top_borders, zoom = 12, maptype = "toner-lite")
 end_map <- ggmap(end, extent = "device", legend = "topright")
 
-end_map + stat_density2d(
-aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha = ..level..),
-size = 1, bins = 5, data = total_data,
-geom = "polygon"
-)
+#Map of the morning riders
+morning_map <- end_map + stat_density2d(
+  aes(x = end.station.longitude,
+      y = end.station.latitude,
+      fill = ..level..,
+      alpha = ..level..),
+  size = 1,
+  bins = 5,
+  data = morning,
+  geom = "polygon") +
+  labs(fill = "Density", title = "Morning Riders Map")
+
+#Map of the afternoon riders
+afternoon_map <- end_map + stat_density2d(
+  aes(x = end.station.longitude,
+      y = end.station.latitude,
+      fill = ..level..,
+      alpha = ..level..),
+  size = 1,
+  bins = 5,
+  data = afternoon,
+  geom = "polygon") +
+  labs(fill = "Density", title = "Afternoon Riders Map")
+
+#Map of the night riders
+night_map <- end_map + stat_density2d(
+  aes(x = end.station.longitude,
+      y = end.station.latitude,
+      fill = ..level..,
+      alpha = ..level..),
+  size = 1,
+  bins = 5,
+  data = night,
+  geom = "polygon") +
+  labs(fill = "Density", title = "Night Riders Map")
+
+morning_map
+afternoon_map
+night_map
 ```
 
 #### End Location Preferences - by User Type
