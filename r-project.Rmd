@@ -136,6 +136,8 @@ total_data %>%
   ggtitle("Bike Rental Counts by Gender")
 ```
 
+From this bar graph, we can see the majority of people who rent bikes are males. Unknown are users who did not input their gender, meaning they are a mix of males, females, and other genders.
+
 ### Subscriber vs Customer for Riders
 
 ```{r}
@@ -146,6 +148,8 @@ total_data %>%
   theme(legend.position="none") + 
   ggtitle("Bike Rental Counts by User Type")
 ```
+
+The majority of bike renters are subscribers. This make sense as the subscribers probably use the bikes as everyday transportation and a subscription service is probably cheaper than renting a bike each time. Customers are probably people who just want to enjoy a bike ride once in a while or tourists, where a subscription service wouldn't make sense.
 
 ### Trip Duration
 
@@ -159,10 +163,9 @@ trip_duration_stats <- filter(total_data) %>%
 # average length of bike ride
             duration_mean = mean(tripduration, na.rm=TRUE), 
 # standard deviation of bike ride
-            duration_sd = sd(tripduration, na.rm=TRUE)) 
-  
-trip_duration_stats
+            duration_sd = sd(tripduration, na.rm=TRUE))
 ```
+
 ### Trip Duration with Rain
 
 ```{r}
@@ -175,9 +178,7 @@ total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0) %>%
 # average length of bike ride affected by rain
             duration_mean = mean(tripduration, na.rm=TRUE), 
 # standard deviation of bike ride affected by rain
-            duration_sd = sd(tripduration, na.rm=TRUE)) 
-
-total_data_rain
+            duration_sd = sd(tripduration, na.rm=TRUE))
 ```
 
 ### Trip Duration with Snow
@@ -193,8 +194,6 @@ total_data_snow <- filter(total_data, SNOW > 0) %>%
       duration_mean = mean(tripduration, na.rm=TRUE), 
 # standard deviation of bike ride affected by snow
       duration_sd = sd(tripduration, na.rm=TRUE)) 
-
-total_data_snow
 ```
 
 ### Trip Duration with Wind
@@ -210,8 +209,6 @@ total_data_wind <- filter(total_data, SNOW == 0, PRCP == 0, AWND > 0) %>%
       duration_mean = mean(tripduration, na.rm=TRUE), 
 # standard deviation of bike ride affected by snow
       duration_sd = sd(tripduration, na.rm=TRUE)) 
-
-total_data_wind
 ```
 
 ```{r}
@@ -224,6 +221,7 @@ dataframe_list = list("Total Data" = trip_duration_stats,
 do.call(rbind, dataframe_list)
 ```
 
+We set the max time at 3600 seconds, as any time after that seemed to be a bike that hadn't been properly returned to a station. The average trip time for all riders, regardless of weather effects is `r trip_duration_stats[1, 3]`. The average time for trip duration when it's raining is `r total_data_rain[1, 3]`. This is is smaller than the trip duration for all riders regardless of weather, meaning people are probably trying to get out of the rain quickly and not going on leisurely rides. The average time for trip duration when it's snowing is `r total_data_snow[1, 3]`. This is is also smaller than average trip duration for all riders, regardless of weather. This time is even shorter than people riding in the rain. This most likely indicates that people are riding for pure necessity and not for fun. The average time for trip duration when it's windy is `r total_data_wind[1, 3]`. This average time is substantially longer than ll other weather types. Most likely doesn't deter people from riding bikes, but the wind pushing against riders most likely increases their trip duration.  
 
 ### Types of Weather per Month
 
@@ -291,7 +289,8 @@ total_data %>%
   ggplot(aes(x = tripduration)) + 
   geom_histogram(aes(y=..density..), colour="black", fill="white") +
   geom_density(alpha=.2, fill="#FF6666") + 
-  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1)
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
+  labs(title="Histogram of Rider Time Affected by Rain", x="Trip Duration", y="Density")
 ```
 
 ### Snow Effects on Trip Duration
@@ -307,7 +306,8 @@ total_data %>%
   ggplot(aes(x = tripduration)) + 
   geom_histogram(aes(y=..density..), colour="black", fill="white") +
   geom_density(alpha=.2, fill="#FF6666") + 
-  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1)
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
+  labs(title="Histogram of Rider Time Affected by Snow", x="Trip Duration", y="Density")
 ```
 
 ### Wind Effects on Trip Duration
@@ -323,7 +323,8 @@ total_data %>%
   ggplot(aes(x = tripduration)) + 
   geom_histogram(aes(y=..density..), colour="black", fill="white") +
   geom_density(alpha=.2, fill="#FF6666") + 
-  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1)
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
+  labs(title="Histogram of Rider Time Affected by Wind", x="Trip Duration", y="Density")
 ```
 
 ### Weather Effects on Number of Rides over Average Ride Time
@@ -409,7 +410,7 @@ total_data %>%
                                         c('Male', 'Female', 'Unknown'))) +
   geom_smooth(method='lm', colour = 'black') +
   facet_wrap(~gender)  + # make a plot per gender. look up facet_wrap for other fun ways to do this 
-  labs(title="Average Speed of Riders by Age", x="Speed", y="Age")
+  labs(title="Average Speed of Riders by Age", x="Age", y="Speed")
 ```
 
 ```{r}
@@ -492,12 +493,38 @@ This graph shows that there is larger focus on downtown start locations for Subs
 #### Start Location Preferences - by Trip Duration
 
 ```{r}
-## break down by one standard deviation above and below average of trip duration
+# Creating a data frame where trip duration is one SD and above
+one_sd_above <- as.numeric(trip_duration_stats[1, 3]) + as.numeric(trip_duration_stats[1, 4])
+sd_above_data <- total_data %>%
+    filter(trip_duration_stats[1, 3] <= tripduration, tripduration <= one_sd_above)
+
+# Creating a data frame where trip duration is one SD and below
+one_sd_below <- as.numeric(trip_duration_stats[1, 3]) - as.numeric(trip_duration_stats[1, 4])
+sd_below_data <- total_data %>%
+    filter(one_sd_below <= tripduration, tripduration <= trip_duration_stats[1, 3])
+
+# Map with total riders trip duration
 ggmap(start) +
-    geom_point(data = total_data, mapping = aes(x = start.station.longitude, y = start.station.latitude,
+  geom_point(data = total_data, mapping = aes(x = start.station.longitude, y = start.station.latitude,
                                         col = tripduration)) +
-    scale_color_gradient(low = "yellow", high = "red")
+  scale_color_gradient(low = "yellow", high = "red") +
+  labs(title = "Start Location by Trip Duration")
+
+# Map with trip duration one SD above
+ggmap(start) +
+  geom_point(data = sd_above_data, mapping = aes(x = start.station.longitude, y = start.station.latitude,
+                                        col = tripduration)) +
+  scale_color_gradient(low = "yellow", high = "red") +
+  labs(title = "Start Location by Trip Duration One SD Above Mean")
+
+# Map with trip duration one SD below
+ggmap(start) +
+  geom_point(data = sd_below_data, mapping = aes(x = start.station.longitude, y = start.station.latitude,
+                                        col = tripduration)) +
+  scale_color_gradient(low = "yellow", high = "red") +
+  labs(title = "Start Location by Trip Duration One SD Below Mean")
 ```
+
 
 ### End Location Preferences
 
