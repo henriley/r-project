@@ -221,14 +221,20 @@ total_data %>%
 
 ## Exploratory Data Analysis - Weather Effects
 
-### Average Precipitation by Age
+### Average Rain by Age
 
 ```{r}
-# Mean PRCP by Age of Rider
-total_data %>% 
+# Trip duration by age of riders and rain amount
+plot_data <- total_data %>%
+  filter(SNOW == 0) %>%
   group_by(age) %>%
-  summarise(mean_PRCP_by_age = mean(PRCP)) %>%
-  ggplot(aes(x = age, y = mean_PRCP_by_age)) + geom_line() + geom_smooth() 
+  summarise(mean_PRCP_by_age = mean(PRCP),
+            mean_duration = mean(tripduration)) 
+
+plot_data %>%
+  ggplot(aes(x = age, y = mean_PRCP_by_age)) +
+  geom_point(alpha =0.9, shape = 18, colour = "blue", size = plot_data$mean_duration/150) +
+  geom_smooth(colour = "orange") 
 ```
 
 ### Average Wind by Age
@@ -282,8 +288,8 @@ total_data %>%
 
 total_data %>%
   filter(SNOW > 0) %>%
-  ggplot(aes(x = tripduration)) +
-  geom_density(aes(fill=factor(SNOW)), alpha=0.8)
+  ggplot(aes(x = SNOW)) +
+  geom_density(aes(fill=factor(tripduration)), alpha=0.8)
 
 total_data %>%
   filter(SNOW > 0) %>%
@@ -481,19 +487,6 @@ facet_wrap(~ day_of_week)
 
 ```
 
-#### Start Location Preferences - by Gender
-
-```{r}
-start_map +
-stat_density2d(
-aes(x = start.station.longitude, y = start.station.latitude, fill = ..level.., alpha = ..level..),
-bins = 5, geom = "polygon",
-data = total_data) +
-scale_fill_gradient(low = "black", high = "red") +
-facet_wrap(~ gender)
-
-```
-
 #### Start Location Preferences - by Customer Type
 
 ```{r}
@@ -510,6 +503,7 @@ facet_wrap(~ usertype)
 #### Start Location Preferences - by Trip Duration
 
 ```{r}
+## break down by one standard deviation above and below average of trip duration
 ggmap(start) +
     geom_point(data = total_data, mapping = aes(x = start.station.longitude, y = start.station.latitude,
                                         col = tripduration)) +
@@ -519,6 +513,7 @@ ggmap(start) +
 ### End Location Preferences
 
 ```{r}
+## before noon and after noon
 end <- get_stamenmap(top_borders, zoom = 12, maptype = "toner-lite")
 end_map <- ggmap(end, extent = "device", legend = "topright")
 
@@ -527,32 +522,6 @@ aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha
 size = 1, bins = 5, data = total_data,
 geom = "polygon"
 )
-```
-
-#### End Location Preferences - by Day of Week
-
-```{r}
-end_map +
-stat_density2d(
-aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha = ..level..),
-bins = 5, geom = "polygon",
-data = total_data) +
-scale_fill_gradient(low = "black", high = "red") +
-facet_wrap(~ day_of_week)
-
-```
-
-#### End Location Preferences - by Gender
-
-```{r}
-end_map +
-stat_density2d(
-aes(x = end.station.longitude, y = end.station.latitude, fill = ..level.., alpha = ..level..),
-bins = 5, geom = "polygon",
-data = total_data) +
-scale_fill_gradient(low = "black", high = "red") +
-facet_wrap(~ gender)
-
 ```
 
 #### End Location Preferences - by User Type
