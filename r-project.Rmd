@@ -106,6 +106,19 @@ total_data = merge(edited_weather, edited_rider, by.x="DATE", by.y="DATE", all.x
 head(total_data)
 ```
 
+### Distance Between Stations
+
+```{r}
+# Distance between start and end station in Meters
+total_data <- mutate(total_data, 
+                            distance = distHaversine(cbind(total_data$start.station.longitude,
+                                                           total_data$start.station.latitude),
+                                                     cbind(total_data$end.station.longitude,
+                                                           total_data$end.station.latitude)))
+
+head(total_data)
+```
+
 ## Initial Data Analysis
 
 ### Gender Split in Riders
@@ -259,17 +272,8 @@ total_data %>%
   filter(PRCP > 0, SNOW == 0) %>%
   ggplot(aes(x = tripduration)) + 
   geom_histogram(aes(y=..density..), colour="black", fill="white") +
-  geom_density(alpha=.2, fill="#FF6666") 
-
-total_data %>%
-  filter(PRCP > 0, SNOW == 0) %>%
-  ggplot(aes(x = tripduration)) +
-  geom_density(aes(fill=factor(PRCP)), alpha=0.8)
-
-total_data %>%
-  filter(PRCP > 0, SNOW == 0) %>%
-  ggplot(aes(x = tripduration)) +
-  geom_histogram()
+  geom_density(alpha=.2, fill="#FF6666") + 
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1)
 ```
 
 ### Snow Effects on Trip Duration
@@ -284,17 +288,8 @@ total_data %>%
   filter(SNOW > 0) %>%
   ggplot(aes(x = tripduration)) + 
   geom_histogram(aes(y=..density..), colour="black", fill="white") +
-  geom_density(alpha=.2, fill="#FF6666") 
-
-total_data %>%
-  filter(SNOW > 0) %>%
-  ggplot(aes(x = SNOW)) +
-  geom_density(aes(fill=factor(tripduration)), alpha=0.8)
-
-total_data %>%
-  filter(SNOW > 0) %>%
-  ggplot(aes(x = tripduration)) +
-  geom_histogram()
+  geom_density(alpha=.2, fill="#FF6666") + 
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1)
 ```
 
 ### Wind Effects on Trip Duration
@@ -309,17 +304,8 @@ total_data %>%
   filter(AWND > 0) %>%
   ggplot(aes(x = tripduration)) + 
   geom_histogram(aes(y=..density..), colour="black", fill="white") +
-  geom_density(alpha=.2, fill="#FF6666") 
-
-total_data %>%
-  filter(AWND > 0) %>%
-  ggplot(aes(x = tripduration)) +
-  geom_density(aes(fill=factor(AWND)), alpha=0.8)
-
-total_data %>%
-  filter(AWND > 0) %>%
-  ggplot(aes(x = tripduration)) +
-  geom_histogram()
+  geom_density(alpha=.2, fill="#FF6666") + 
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1)
 ```
 
 ### Weather Effects on Number of Rides over Average Ride Time
@@ -351,19 +337,6 @@ wind_num[1,1]
 ```
 
 ## Exploratory Data Analysis - Ride History
-
-### Distance Between Stations
-
-```{r}
-# Distance between start and end station in Meters
-total_data <- mutate(total_data, 
-                            distance = distHaversine(cbind(total_data$start.station.longitude,
-                                                           total_data$start.station.latitude),
-                                                     cbind(total_data$end.station.longitude,
-                                                           total_data$end.station.latitude)))
-
-head(total_data)
-```
 
 ### Speed of Rider Demographics
 
