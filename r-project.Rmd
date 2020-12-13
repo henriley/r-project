@@ -515,7 +515,7 @@ theme(legend.position = "right")
 ```
 We see the same pattern breakdown in the end location density as we do the start locations, suggesting that weekends have a more spread out end locations than the weekdays. 
 
-## Asymmetrical Traffic Data 
+## Asymmetrical Traffic Data
 ```{r}
 total_rides = count(total_data)
 test = total_data
