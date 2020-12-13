@@ -293,11 +293,12 @@ total_data %>%
 total_data %>% 
   filter(PRCP > 0, SNOW == 0) %>%
   ggplot(aes(x = tripduration)) + 
-  geom_histogram(aes(y=..density..), colour="black", fill="white") +
-  geom_density(alpha=.2, fill="#FF6666") + 
+  geom_histogram(colour="black", fill="white") +
   geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
-  labs(title="Histogram of Rider Time Affected by Rain", x="Trip Duration", y="Density")
+  labs(title="Histogram of Rider Time Affected by Rain", x="Trip Duration", y="Count")
 ```
+
+The distribution is skewed left in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
 
 ### Snow Effects on Trip Duration
 
@@ -310,28 +311,30 @@ total_data %>%
 total_data %>% 
   filter(SNOW > 0) %>%
   ggplot(aes(x = tripduration)) + 
-  geom_histogram(aes(y=..density..), colour="black", fill="white") +
-  geom_density(alpha=.2, fill="#FF6666") + 
+  geom_histogram(colour="black", fill="white") +
   geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
-  labs(title="Histogram of Rider Time Affected by Snow", x="Trip Duration", y="Density")
+  labs(title="Histogram of Rider Time Affected by Snow", x="Trip Duration", y="Count")
 ```
+
+The distribution is still skewed left, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
 
 ### Wind Effects on Trip Duration
 
 ```{r}
 # Average ride time when it's windy
 total_data %>%
-  filter(AWND > 0) %>%
+  filter(SNOW == 0, PRCP == 0, AWND > 0) %>%
   summarise(wind_duration_mean = mean(tripduration))
 
 total_data %>% 
-  filter(AWND > 0) %>%
+  filter(SNOW == 0, PRCP == 0, AWND > 0) %>%
   ggplot(aes(x = tripduration)) + 
-  geom_histogram(aes(y=..density..), colour="black", fill="white") +
-  geom_density(alpha=.2, fill="#FF6666") + 
+  geom_histogram(colour="black", fill="white") +
   geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
-  labs(title="Histogram of Rider Time Affected by Wind", x="Trip Duration", y="Density")
+  labs(title="Histogram of Rider Time Affected by Wind", x="Trip Duration", y="Count")
 ```
+
+The distribution is still skewed left, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
 
 ### Weather Effects on Number of Rides over Average Ride Time
 
@@ -406,6 +409,27 @@ cust_ride <- total_data %>%
 cbind(all_ride, young_ride, old_ride, fem_ride, male_ride, sub_ride, cust_ride)
 ```
 
+### Speed of Riders Affected by Weather
+
+```{r}
+# Speed affected by rain
+rain_speed <- total_data %>%
+  filter(PRCP > 0, SNOW == 0) %>%
+  summarise(rain_average = mean(speed))
+
+# Speed affected by snow
+snow_speed <- total_data %>%
+  filter(SNOW > 0) %>%
+  summarise(snow_average = mean(speed))
+
+# Speed affected by wind
+wind_speed <- total_data %>%
+  filter(PRCP == 0, SNOW == 0, AWND > 0) %>%
+  summarise(wind_average = mean(speed))
+
+cbind(rain_speed, snow_speed, wind_speed)
+```
+
 ```{r}
 # Scatter Plot of speed by age
 total_data %>%
@@ -430,6 +454,8 @@ total_data %>%
   labs(title="Speed of Riders by Gender", x="Gender", y="Speed")
 ```
 
+From the scatter plots, we can see that all genders saw a decrease in speed as riders got older. The drop off was most steep for the Unkown gender group, but since Unknown is a mix of all genders, it's hard to make any analyses for the group. Males had a steeper decline in speed as they got older than Females, but from the box plots, we can see that Males were faster than Females on average.
+
 ```{r}
 # Boxplot of speed by customer type
 total_data %>%
@@ -440,6 +466,8 @@ total_data %>%
                                         c('Subscriber', 'Customer'))) +
   labs(title="Speed of Riders by Customer Type", x="Customer Type", y="Speed")
 ```
+
+From these box plots, we see that Subscribers ride substantially faster than Customers. This could be because Subscribers use the bike for important purposes like going to work everyday, while Customers are most likely tourists or people riding for leisure who just want to take their time riding through the city.
 
 ## Exploratory Data Analysis - Ride History
 
@@ -530,6 +558,7 @@ ggmap(start) +
   labs(title = "Start Location by Trip Duration One SD Below Mean")
 ```
 
+These graphs allow us to pinpoint how long riders are riding for depending on their start location. The edges of the city tend to have higher red dots for the trip duration one SD below the mean and the inner part of the city has higher red dots for th trip duration one SD above the mean; this could show that people who are on the outskirts of the city don't have to travel as far as those in the heart of the city.
 
 ### End Location Preferences
 
