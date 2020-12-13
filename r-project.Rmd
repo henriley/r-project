@@ -14,8 +14,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Group Project
 
-## Import Packages
-
 ```{r}
 library("ggplot2")
 library('dplyr')
@@ -24,7 +22,9 @@ library('geosphere')
 library("ggmap")
 ```
 
-## Importing Data
+## 0. Initial Setup
+
+### Importing Data
 
 ```{r}
 # Reading in the sample CSV of rider data we made
@@ -36,7 +36,7 @@ weather_data <- read.csv('NYCWeather2019.csv', stringsAsFactors = TRUE)
 head(weather_data)
 ```
 
-## Initial Data Summary
+### Data Summary
 
 ```{r}
 # Initial summary of rider data set
@@ -49,6 +49,7 @@ summary(rider_2019_sample)
 str(weather_data)
 summary(rider_2019_sample)
 ```
+
 
 ### Adjusting Dates and Times in Data Sets
 
@@ -125,7 +126,7 @@ total_data <- filter(total_data, tripduration <= 3600)
 head(total_data)
 ```
 
-## Initial Data Analysis
+## 1. Initial Data Analysis
 
 ### Gender Split in Riders
 
@@ -172,199 +173,7 @@ trip_duration_stats <- filter(total_data) %>%
             duration_sd = sd(tripduration, na.rm=TRUE))
 ```
 
-### Trip Duration with Rain
-
-```{r}
-# Range of all bike rides affected by rain
-total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0) %>%
-# min range of tripduration 
-    summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
-# max range of tripduration
-            duration_range_max = max(tripduration, na.rm=TRUE), 
-# average length of bike ride affected by rain
-            duration_mean = mean(tripduration, na.rm=TRUE), 
-# standard deviation of bike ride affected by rain
-            duration_sd = sd(tripduration, na.rm=TRUE))
-```
-
-### Trip Duration with Snow
-
-```{r}
-# Range of all bike rides affected by snow
-total_data_snow <- filter(total_data, SNOW > 0) %>%
-# min range of tripduration
-      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
-# max range of tripduration
-      duration_range_max = max(tripduration, na.rm=TRUE), 
-# average length of bike ride affected by snow
-      duration_mean = mean(tripduration, na.rm=TRUE), 
-# standard deviation of bike ride affected by snow
-      duration_sd = sd(tripduration, na.rm=TRUE)) 
-```
-
-### Trip Duration with Wind
-
-```{r}
-# Range of all bike rides affected by wind
-total_data_wind <- filter(total_data, SNOW == 0, PRCP == 0, AWND > 0) %>% 
-# min range of tripduration
-      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
-# max range of tripduration
-      duration_range_max = max(tripduration, na.rm=TRUE), 
-# average length of bike ride affected by snow
-      duration_mean = mean(tripduration, na.rm=TRUE), 
-# standard deviation of bike ride affected by snow
-      duration_sd = sd(tripduration, na.rm=TRUE)) 
-```
-
-```{r}
-# Combine above dataframes into one dataframe for side-by-side comparison
-dataframe_list = list("Total Data" = trip_duration_stats,
-                      "Rain Data" = total_data_rain,
-                      "Snow Data" = total_data_snow,
-                      "Wind Data" = total_data_wind)
-# Can also do rbind(trip_duration_stats, total_data_rain, etc) but this keeps source table names defined above
-do.call(rbind, dataframe_list)
-```
-
-We set the max time at 3600 seconds, as any time after that seemed to be a bike that hadn't been properly returned to a station. The average trip time for all riders, regardless of weather effects is `r trip_duration_stats[1, 3]`. The average time for trip duration when it's raining is `r total_data_rain[1, 3]`. This is is smaller than the trip duration for all riders regardless of weather, meaning people are probably trying to get out of the rain quickly and not going on leisurely rides. The average time for trip duration when it's snowing is `r total_data_snow[1, 3]`. This is is also smaller than average trip duration for all riders, regardless of weather. This time is even shorter than people riding in the rain. This most likely indicates that people are riding for pure necessity and not for fun. The average time for trip duration when it's windy is `r total_data_wind[1, 3]`. This average time is substantially longer than ll other weather types. Most likely doesn't deter people from riding bikes, but the wind pushing against riders most likely increases their trip duration.  
-
-### Types of Weather per Month
-
-```{r}
-# Average rain per month
-total_data %>%
-  filter(SNOW == 0) %>%
-  group_by(Month) %>% 
-  summarise(average_rain = mean(PRCP, na.rm = TRUE))
-```
-
-```{r}
-# Average snow per month
-total_data %>% 
-  group_by(Month) %>% 
-  summarise(average_snow = mean(SNOW, na.rm = TRUE))
-```
-
-```{r}
-# Average wind speed per month
-total_data %>%
-  group_by(Month) %>% 
-  summarise(average_wind_speed = mean(AWND, na.rm = TRUE))
-# mean returns NaN if all values in group (ex: jan and feb) are NA
-```
-
-## Exploratory Data Analysis - Weather Effects
-
-### Average Rain by Age
-
-```{r}
-# Trip duration by age of riders and rain amount
-plot_data <- total_data %>%
-  filter(SNOW == 0) %>%
-  group_by(age) %>%
-  summarise(mean_PRCP_by_age = mean(PRCP),
-            mean_duration = mean(tripduration)) 
-
-plot_data %>%
-  ggplot(aes(x = age, y = mean_PRCP_by_age)) +
-  geom_point(alpha =0.9, shape = 18, colour = "blue", size = plot_data$mean_duration/150) +
-  geom_smooth(colour = "orange") 
-```
-
-### Average Wind by Age
-
-```{r}
-# Mean Wind by Age of Rider
-total_data %>% 
-  group_by(age) %>%
-  summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE)) %>%
-  ggplot(aes(x = age, y = mean_AWND_by_age)) + geom_line() + geom_smooth() 
-```
-
-## Rain Effects on Trip Duration
-
-```{r}
-# Average ride time when it's raining
-total_data %>%
-  filter(PRCP > 0, SNOW == 0) %>%
-  summarise(prcp_duration_mean = mean(tripduration))
-
-total_data %>% 
-  filter(PRCP > 0, SNOW == 0) %>%
-  ggplot(aes(x = tripduration)) + 
-  geom_histogram(colour="black", fill="white") +
-  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
-  labs(title="Histogram of Rider Time Affected by Rain", x="Trip Duration", y="Count")
-```
-
-The distribution is skewed left in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
-
-### Snow Effects on Trip Duration
-
-```{r}
-# Average ride time when it's snowing
-total_data %>%
-  filter(SNOW > 0) %>%
-  summarise(snow_duration_mean = mean(tripduration))
-
-total_data %>% 
-  filter(SNOW > 0) %>%
-  ggplot(aes(x = tripduration)) + 
-  geom_histogram(colour="black", fill="white") +
-  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
-  labs(title="Histogram of Rider Time Affected by Snow", x="Trip Duration", y="Count")
-```
-
-The distribution is still skewed left, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
-
-### Wind Effects on Trip Duration
-
-```{r}
-# Average ride time when it's windy
-total_data %>%
-  filter(SNOW == 0, PRCP == 0, AWND > 0) %>%
-  summarise(wind_duration_mean = mean(tripduration))
-
-total_data %>% 
-  filter(SNOW == 0, PRCP == 0, AWND > 0) %>%
-  ggplot(aes(x = tripduration)) + 
-  geom_histogram(colour="black", fill="white") +
-  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
-  labs(title="Histogram of Rider Time Affected by Wind", x="Trip Duration", y="Count")
-```
-
-The distribution is still skewed left, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
-
-### Weather Effects on Number of Rides over Average Ride Time
-
-```{r}
-# Number of rides over average time sin weather effects
-ride_num <- total_data %>%
-  filter(tripduration > trip_duration_stats[1,3]) %>%
-  count()
-ride_num[1,1]
-
-# Number of rides over average time with rain
-rain_num <- total_data %>%
-  filter(SNOW == 0, PRCP > 0, tripduration > trip_duration_stats[1,3]) %>%
-  count()
-rain_num[1,1]
-
-# Number of rides over average time with snow
-snow_num <- total_data %>%
-  filter(SNOW > 0, tripduration > trip_duration_stats[1,3]) %>%
-  count()
-snow_num[1,1]
-
-# Number of rides over average time with wind
-wind_num <- total_data %>%
-  filter(AWND > 0, tripduration > trip_duration_stats[1,3]) %>%
-  count()
-wind_num[1,1]
-```
-
-## Exploratory Data Analysis - Ride History
+## 2. Ride History Pattern Analysis
 
 ### Speed of Rider Demographics
 
@@ -468,8 +277,6 @@ total_data %>%
 ```
 
 From these box plots, we see that Subscribers ride substantially faster than Customers. This could be because Subscribers use the bike for important purposes like going to work everyday, while Customers are most likely tourists or people riding for leisure who just want to take their time riding through the city.
-
-## Exploratory Data Analysis - Start/End Location Trends
 
 ### Start Location Preferences
 
@@ -638,7 +445,7 @@ theme(legend.position = "right")
 
 We see the same pattern breakdown in the end location density as we do the start locations, suggesting that weekends have a more spread out end locations than the weekdays. 
 
-## Exploratory Data Analysis - Asymmetric Traffic
+## 3. Assymetric Traffic Analysis
 
 ### Symmetric vs. Asymmetric Traffic
 
@@ -654,7 +461,7 @@ symmetric = same_station / total_rides
 asymmetric = 1 - symmetric
 ```
 
-Only `{r} symmetric`% of rides start and end at the same station, which means that `{r} asymmetric`% of rides are asymmetric traffic.
+Only `r symmetric`% of rides start and end at the same station, which means that `r asymmetric`% of rides are asymmetric traffic.
 
 ### Station Popularity
 ```{r}
@@ -669,7 +476,7 @@ top10_rides = top_10rides / total_rides
 
 ```
 
-`{r}top10_rides` of bike rides start come from the top 10% most used station (which are:`{r} top_10`). Understanding this, it would be useful to focus on bike availability / station maintenance for the few most frequented stations, as they account for a substantial portion of traffic.
+`r top10_rides` of bike rides start come from the top 10% most used station (which are:`{r} top_10`). Understanding this, it would be useful to focus on bike availability / station maintenance for the few most frequented stations, as they account for a substantial portion of traffic.
 
 ### Flow of Traffic per Station
 ```{r}
@@ -689,21 +496,209 @@ station_flow %>% mutate(station = fct_reorder(station, net)) %>% ggplot(aes(x=st
 
 The chart above depicts each station's inflow/outflow of bikes in 2019. Those with a value greater than 1 show that they have a higher rate of bikes starting at their station than ending at their station. These stations would be important to target when thinking about rebalancing bikes, as they overall have more bikes leaving them then coming to them. Similarly, those with the lowest start/end ratios have more bikes ending at their station than leaving, making them prime candidates for moving their surplus to a station in more need.
 
-
 ### Bike Surplus and Deficit Stations
+
 ```{r}
 surplus_stations = station_flow[station_flow$net < 0.75,]
 deficit_stations = station_flow[station_flow$net > 1.25,]
-
-surplus_stations 
-deficit_stations
-
 ```
 
 Stations with surplus:  
-`{r} surplus_stations$station `
+`r surplus_stations$station `
 
 Stations with deficit: 
-`{r} deficit_stations$station `
+`r deficit_stations$station `
 
+
+## 4. Weather Analysis
+
+### Trip Duration with Rain
+
+```{r}
+# Range of all bike rides affected by rain
+total_data_rain <- filter(total_data, SNOW == 0, PRCP > 0) %>%
+# min range of tripduration 
+    summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
+# max range of tripduration
+            duration_range_max = max(tripduration, na.rm=TRUE), 
+# average length of bike ride affected by rain
+            duration_mean = mean(tripduration, na.rm=TRUE), 
+# standard deviation of bike ride affected by rain
+            duration_sd = sd(tripduration, na.rm=TRUE))
+```
+
+### Trip Duration with Snow
+
+```{r}
+# Range of all bike rides affected by snow
+total_data_snow <- filter(total_data, SNOW > 0) %>%
+# min range of tripduration
+      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
+# max range of tripduration
+      duration_range_max = max(tripduration, na.rm=TRUE), 
+# average length of bike ride affected by snow
+      duration_mean = mean(tripduration, na.rm=TRUE), 
+# standard deviation of bike ride affected by snow
+      duration_sd = sd(tripduration, na.rm=TRUE)) 
+```
+
+### Trip Duration with Wind
+
+```{r}
+# Range of all bike rides affected by wind
+total_data_wind <- filter(total_data, SNOW == 0, PRCP == 0, AWND > 0) %>% 
+# min range of tripduration
+      summarise(duration_range_min = min(tripduration, na.rm=TRUE), 
+# max range of tripduration
+      duration_range_max = max(tripduration, na.rm=TRUE), 
+# average length of bike ride affected by snow
+      duration_mean = mean(tripduration, na.rm=TRUE), 
+# standard deviation of bike ride affected by snow
+      duration_sd = sd(tripduration, na.rm=TRUE)) 
+```
+
+```{r}
+# Combine above dataframes into one dataframe for side-by-side comparison
+dataframe_list = list("Total Data" = trip_duration_stats,
+                      "Rain Data" = total_data_rain,
+                      "Snow Data" = total_data_snow,
+                      "Wind Data" = total_data_wind)
+# Can also do rbind(trip_duration_stats, total_data_rain, etc) but this keeps source table names defined above
+do.call(rbind, dataframe_list)
+```
+
+We set the max time at 3600 seconds, as any time after that seemed to be a bike that hadn't been properly returned to a station. The average trip time for all riders, regardless of weather effects is `r trip_duration_stats[1, 3]`. The average time for trip duration when it's raining is `r total_data_rain[1, 3]`. This is is smaller than the trip duration for all riders regardless of weather, meaning people are probably trying to get out of the rain quickly and not going on leisurely rides. The average time for trip duration when it's snowing is `r total_data_snow[1, 3]`. This is is also smaller than average trip duration for all riders, regardless of weather. This time is even shorter than people riding in the rain. This most likely indicates that people are riding for pure necessity and not for fun. The average time for trip duration when it's windy is `r total_data_wind[1, 3]`. This average time is substantially longer than ll other weather types. Most likely doesn't deter people from riding bikes, but the wind pushing against riders most likely increases their trip duration.  
+
+### Types of Weather per Month
+
+```{r}
+# Average rain per month
+total_data %>%
+  filter(SNOW == 0) %>%
+  group_by(Month) %>% 
+  summarise(average_rain = mean(PRCP, na.rm = TRUE))
+```
+
+```{r}
+# Average snow per month
+total_data %>% 
+  group_by(Month) %>% 
+  summarise(average_snow = mean(SNOW, na.rm = TRUE))
+```
+
+```{r}
+# Average wind speed per month
+total_data %>%
+  group_by(Month) %>% 
+  summarise(average_wind_speed = mean(AWND, na.rm = TRUE))
+# mean returns NaN if all values in group (ex: jan and feb) are NA
+```
+
+### Average Rain by Age
+
+```{r}
+# Trip duration by age of riders and rain amount
+plot_data <- total_data %>%
+  filter(SNOW == 0) %>%
+  group_by(age) %>%
+  summarise(mean_PRCP_by_age = mean(PRCP),
+            mean_duration = mean(tripduration)) 
+
+plot_data %>%
+  ggplot(aes(x = age, y = mean_PRCP_by_age)) +
+  geom_point(alpha =0.9, shape = 18, colour = "blue", size = plot_data$mean_duration/150) +
+  geom_smooth(colour = "orange") 
+```
+
+### Average Wind by Age
+
+```{r}
+# Mean Wind by Age of Rider
+total_data %>% 
+  group_by(age) %>%
+  summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE)) %>%
+  ggplot(aes(x = age, y = mean_AWND_by_age)) + geom_line() + geom_smooth() 
+```
+
+## Rain Effects on Trip Duration
+
+```{r}
+# Average ride time when it's raining
+total_data %>%
+  filter(PRCP > 0, SNOW == 0) %>%
+  summarise(prcp_duration_mean = mean(tripduration))
+
+total_data %>% 
+  filter(PRCP > 0, SNOW == 0) %>%
+  ggplot(aes(x = tripduration)) + 
+  geom_histogram(colour="black", fill="white") +
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
+  labs(title="Histogram of Rider Time Affected by Rain", x="Trip Duration", y="Count")
+```
+
+The distribution is skewed left in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
+
+### Snow Effects on Trip Duration
+
+```{r}
+# Average ride time when it's snowing
+total_data %>%
+  filter(SNOW > 0) %>%
+  summarise(snow_duration_mean = mean(tripduration))
+
+total_data %>% 
+  filter(SNOW > 0) %>%
+  ggplot(aes(x = tripduration)) + 
+  geom_histogram(colour="black", fill="white") +
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
+  labs(title="Histogram of Rider Time Affected by Snow", x="Trip Duration", y="Count")
+```
+
+The distribution is still skewed left, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
+
+### Wind Effects on Trip Duration
+
+```{r}
+# Average ride time when it's windy
+total_data %>%
+  filter(SNOW == 0, PRCP == 0, AWND > 0) %>%
+  summarise(wind_duration_mean = mean(tripduration))
+
+total_data %>% 
+  filter(SNOW == 0, PRCP == 0, AWND > 0) %>%
+  ggplot(aes(x = tripduration)) + 
+  geom_histogram(colour="black", fill="white") +
+  geom_vline(aes(xintercept=mean(tripduration)), color="blue", linetype="dashed", size=1) +
+  labs(title="Histogram of Rider Time Affected by Wind", x="Trip Duration", y="Count")
+```
+
+The distribution is still skewed left, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
+
+### Weather Effects on Number of Rides over Average Ride Time
+
+```{r}
+# Number of rides over average time sin weather effects
+ride_num <- total_data %>%
+  filter(tripduration > trip_duration_stats[1,3]) %>%
+  count()
+ride_num[1,1]
+
+# Number of rides over average time with rain
+rain_num <- total_data %>%
+  filter(SNOW == 0, PRCP > 0, tripduration > trip_duration_stats[1,3]) %>%
+  count()
+rain_num[1,1]
+
+# Number of rides over average time with snow
+snow_num <- total_data %>%
+  filter(SNOW > 0, tripduration > trip_duration_stats[1,3]) %>%
+  count()
+snow_num[1,1]
+
+# Number of rides over average time with wind
+wind_num <- total_data %>%
+  filter(AWND > 0, tripduration > trip_duration_stats[1,3]) %>%
+  count()
+wind_num[1,1]
+```
 
