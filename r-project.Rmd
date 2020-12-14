@@ -465,7 +465,7 @@ symmetric = same_station / total_rides
 asymmetric = 1 - symmetric
 ```
 
-Only `r symmetric`% of rides start and end at the same station, which means that `r asymmetric`% of rides are asymmetric traffic.
+Only `r symmetric*100`% of rides start and end at the same station, which means that `r asymmetric*100`% of rides are asymmetric traffic.
 
 ### Station Popularity
 ```{r}
@@ -480,7 +480,7 @@ top10_rides = top_10rides / total_rides
 
 ```
 
-`r top10_rides` of bike rides start come from the top 10% most used station (which are:`{r} top_10`). Understanding this, it would be useful to focus on bike availability / station maintenance for the few most frequented stations, as they account for a substantial portion of traffic.
+`r top10_rides*100`% of bike rides start come from the top 10% most used station. Understanding this, it would be useful to focus on bike availability / station maintenance for the few most frequented stations, as they account for a substantial portion of traffic.
 
 ### Flow of Traffic per Station
 ```{r}
@@ -503,8 +503,8 @@ The chart above depicts each station's inflow/outflow of bikes in 2019. Those wi
 ### Bike Surplus and Deficit Stations
 
 ```{r}
-surplus_stations = station_flow[station_flow$net < 0.75,]
-deficit_stations = station_flow[station_flow$net > 1.25,]
+surplus_stations = station_flow[station_flow$net < 0.5,]
+deficit_stations = station_flow[station_flow$net > 1.5,]
 ```
 
 Stations with surplus:  
