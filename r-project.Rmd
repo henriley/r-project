@@ -1,7 +1,7 @@
 ---
 title: "r-project"
 author: "Riley Maher, Griffin Rubin, Katie Summers, Natalie Vadasz"
-date: "Dec 15, 2020"
+date: "Dec 8, 2020"
 output: 
   html_document: 
     toc: yes
@@ -70,10 +70,11 @@ rider_2019_sample$Year <- format(rider_2019_sample$DATE, "%Y")
 ```
 
 ```{r}
-# Creating columns for time
 dates <- as.POSIXct(rider_2019_sample$stoptime)
 rider_2019_sample$endtime <- format(dates, format = "%H:%M")
 ```
+Here we were able to adjust the datasets to ensure that we could splitthe data up by a number of different variable to allow us to look at rider data over the course of a numberof different weather types, dates and times. 
+
 
 ### Rider Age
 
@@ -113,6 +114,8 @@ edited_rider <- select(rider_2019_sample,
 total_data = merge(edited_weather, edited_rider, by.x="DATE", by.y="DATE", all.x=TRUE)
 head(total_data)
 ```
+Using edited data sets allows us to more closely analyze 4 specific weather types along with specific rider variables. 
+
 
 ### Distance Between Stations
 
@@ -126,6 +129,8 @@ total_data <- mutate(total_data,
 total_data <- filter(total_data, tripduration <= 3600)
 head(total_data)
 ```
+This data frame allows for us to successfully compare trip duration to the other varying data variables we defined above and adding it to an updated dataframe. 
+
 
 ## 1. Initial Data Analysis
 
@@ -216,8 +221,15 @@ cust_ride <- total_data %>%
   filter(usertype == "Subscriber") %>%
   summarise(subscriber_average = mean(speed))
 
-cbind(all_ride, young_ride, old_ride, fem_ride, male_ride, sub_ride, cust_ride)
+cbind(all_ride, 
+young_ride, 
+old_ride, 
+fem_ride, 
+male_ride, 
+sub_ride, 
+cust_ride)
 ```
+By combining all of our variables into one dataframe here, we can compare speeds based on different classification of customers. Here we can see that the average speed of any bike rider is 2.462 with young riders averaging above this along wth male riders. The subscriber average is also significantly higher than customer average.  
 
 ### Speed of Riders Affected by Weather
 
@@ -239,6 +251,7 @@ wind_speed <- total_data %>%
 
 cbind(rain_speed, snow_speed, wind_speed)
 ```
+Combining this data into one datafram allows us to see that wind affects bike speed more than rain or snow. Interestingly enough, snow actually still maintains the fastest speed for bikers at 2.5
 
 ```{r}
 # Scatter Plot of speed by age
@@ -246,7 +259,7 @@ total_data %>%
   ggplot(aes(x = age, y = speed, colour = gender)) +
   geom_point(alpha = .4, size = 1.5) +
   scale_colour_manual(name = 'Gender',
-                      values = setNames(c('dark green','magenta', 'blue'),
+                      values = setNames(c('blue','magenta', 'dark green'),
                                         c('Male', 'Female', 'Unknown'))) +
   geom_smooth(method='lm', colour = 'black') +
   facet_wrap(~gender)  + # make a plot per gender. look up facet_wrap for other fun ways to do this 
@@ -259,12 +272,12 @@ total_data %>%
   ggplot(aes(x = gender, y = speed, colour = gender)) +
   geom_boxplot(outlier.colour = 'red') +
   scale_colour_manual(name = 'Gender',
-                      values = setNames(c('dark green','magenta', 'blue'),
+                      values = setNames(c('blue','magenta', 'dark green'),
                                         c('Male', 'Female', 'Unknown'))) +
   labs(title="Speed of Riders by Gender", x="Gender", y="Speed")
 ```
 
-From the scatter plots, we can see that all genders saw a decrease in speed as riders got older. The drop off was most steep for the Unknown gender group, but since Unknown is a mix of all genders, it's hard to make any analyses for the group. Males had a steeper decline in speed as they got older than Females, but from the box plots, we can see that Males were faster than Females on average.
+From the scatter plots, we can see that all genders saw a decrease in speed as riders got older. The drop off was most steep for the Unkown gender group, but since Unknown is a mix of all genders, it's hard to make any analyses for the group. Males had a steeper decline in speed as they got older than Females, but from the box plots, we can see that Males were faster than Females on average.
 
 ```{r}
 # Boxplot of speed by customer type
@@ -369,7 +382,7 @@ ggmap(start) +
   labs(title = "Start Location by Trip Duration One SD Below Mean")
 ```
 
-These graphs allow us to pinpoint how long riders are riding for depending on their start location. The edges of the city tend to have higher red dots for the trip duration one SD below the mean and the inner part of the city has higher red dots for the trip duration one SD above the mean; this could show that people who are on the outskirts of the city don't have to travel as far as those in the heart of the city.
+These graphs allow us to pinpoint how long riders are riding for depending on their start location. The edges of the city tend to have higher red dots for the trip duration one SD below the mean and the inner part of the city has higher red dots for th trip duration one SD above the mean; this could show that people who are on the outskirts of the city don't have to travel as far as those in the heart of the city.
 
 ### End Location Preferences
 
@@ -430,9 +443,6 @@ afternoon_map
 night_map
 ```
 
-For the end location for the Morning Riders Map, we can see the density level is pretty hot toward the middle of Manhattan; this is most likely people biking to their jobs during the early morning commute. In the Afternoon Riders
-Map, we can see that there isn't that great of a change from the morning map, indicating that people are most likely still commuting to work or are commuting to lunch near their work. For the Night Riders Map, a new hot density area appears above the original; this is most likely people commuting home after the workday.
-
 ### End Locations by User Type
 
 ```{r}
@@ -465,7 +475,7 @@ symmetric = same_station / total_rides
 asymmetric = 1 - symmetric
 ```
 
-Only `r symmetric*100`% of rides start and end at the same station, which means that `r asymmetric*100`% of rides are asymmetric traffic.
+Only `r symmetric`% of rides start and end at the same station, which means that `r asymmetric`% of rides are asymmetric traffic.
 
 ### Station Popularity
 ```{r}
@@ -480,7 +490,7 @@ top10_rides = top_10rides / total_rides
 
 ```
 
-`r top10_rides*100`% of bike rides start come from the top 10% most used station. Understanding this, it would be useful to focus on bike availability / station maintenance for the few most frequented stations, as they account for a substantial portion of traffic.
+`r top10_rides` of bike rides start come from the top 10% most used station (which are:`{r} top_10`). Understanding this, it would be useful to focus on bike availability / station maintenance for the few most frequented stations, as they account for a substantial portion of traffic.
 
 ### Flow of Traffic per Station
 ```{r}
@@ -503,8 +513,8 @@ The chart above depicts each station's inflow/outflow of bikes in 2019. Those wi
 ### Bike Surplus and Deficit Stations
 
 ```{r}
-surplus_stations = station_flow[station_flow$net < 0.5,]
-deficit_stations = station_flow[station_flow$net > 1.5,]
+surplus_stations = station_flow[station_flow$net < 0.75,]
+deficit_stations = station_flow[station_flow$net > 1.25,]
 ```
 
 Stations with surplus:  
@@ -582,6 +592,7 @@ total_data %>%
   group_by(Month) %>% 
   summarise(average_rain = mean(PRCP, na.rm = TRUE))
 ```
+This chart allows us to see that April, May, June and July average the highest amounts of rain. This data falls in line with spring/early summer seasons. December actually garners the most rain per month in NY which is an interesting insight to consider since December is normally more closely associated with snow rather than rain. 
 
 ```{r}
 # Average snow per month
@@ -589,6 +600,7 @@ total_data %>%
   group_by(Month) %>% 
   summarise(average_snow = mean(SNOW, na.rm = TRUE))
 ```
+This chart demonstrates that March actually garners the highest average of snowfall aligning with a late winter snow pileup. 
 
 ```{r}
 # Average wind speed per month
@@ -597,6 +609,7 @@ total_data %>%
   summarise(average_wind_speed = mean(AWND, na.rm = TRUE))
 # mean returns NaN if all values in group (ex: jan and feb) are NA
 ```
+October, November, and December have the highest average wind speeds which aligns with the late fall/early winter months as the weather starts to become colder. 
 
 ### Average Rain by Age
 
@@ -611,51 +624,18 @@ plot_data <- total_data %>%
 plot_data %>%
   ggplot(aes(x = age, y = mean_PRCP_by_age)) +
   geom_point(alpha =0.9, shape = 18, colour = "blue", size = plot_data$mean_duration/150) +
-  geom_smooth(colour = "orange") +
-  ggtitle("Average Precipitation During Rides By Rider Age") +
-  xlab("Rider Age") +
-  ylab("Mean Rain")
+  geom_smooth(colour = "orange") 
 ```
-
-This plot indicates that as rider age increase, the average PRCP during their rides also increases. For ages 40 through 60 however, there is no increse in average PRCP per ride with age. This plot may show that older riders are generally more willing to take rides where the precipitation is greater than younger riders are up to age 65. Data on average PRCP for rides where the rider is over 65-80 years old is sporadic with several outliers. 
 
 ### Average Wind by Age
 
 ```{r}
-plot_data2 <- total_data %>% 
+# Mean Wind by Age of Rider
+total_data %>% 
   group_by(age) %>%
-   summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE),
-            mean_duration = mean(tripduration)) 
-
-plot_data2 %>%
-  ggplot(aes(x = age, y = mean_AWND_by_age)) +
-  geom_point(alpha =0.9, shape = 18, colour = "cyan3", size = plot_data2$mean_duration/150) +
-  geom_smooth(colour = "orange") +
-  ggtitle("Average Wind During Rides By Rider Age") +
-  xlab("Rider Age") +
-  ylab("Mean Wind")
+  summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE)) %>%
+  ggplot(aes(x = age, y = mean_AWND_by_age)) + geom_line() + geom_smooth() 
 ```
-
-Average wind for rides does not vary much with rider age. The mean wind for rides where the rider is 20 is the same for riders who are 60. However, there is a small dip is average wind for riders aged 25-35 of 0.5 MPH. On more windy days this age group is less willing to use citibike. 
-
-## Average Snow by Age
-
-```{r}
-plot_data3 <- total_data %>% 
-  group_by(age) %>%
-   summarise(mean_SNOW_by_age = mean(SNOW,na.rm = TRUE),
-            mean_duration = mean(tripduration)) 
-
-plot_data3 %>%
-  ggplot(aes(x = age, y = mean_SNOW_by_age)) +
-  geom_point(alpha =0.9, shape = 18, colour = "deepskyblue", size = plot_data3$mean_duration/150) +
-  geom_smooth(colour = "orange") +
-  ggtitle("Average Snow During Rides By Rider Age") +
-  xlab("Rider Age") +
-  ylab("Mean Snow")
-```
-
-Average snow during rides increases with rider age, although by a small degree of less than 0.01 inches across the 64 ages analyzed. Similar to precipitation data on each age group, the snow data indicates that snow is less of a deterrent to older demographics than it is to younger riders.
 
 ## Rain Effects on Trip Duration
 
@@ -673,7 +653,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Rain", x="Trip Duration", y="Count")
 ```
 
-The distribution is skewed right in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
+The distribution is skewed left in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
 
 ### Snow Effects on Trip Duration
 
@@ -691,7 +671,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Snow", x="Trip Duration", y="Count")
 ```
 
-The distribution is still skewed right, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
+The distribution is still skewed left, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
 
 ### Wind Effects on Trip Duration
 
@@ -709,7 +689,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Wind", x="Trip Duration", y="Count")
 ```
 
-The distribution is still skewed right, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
+The distribution is still skewed left, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
 
 ### Weather Effects on Number of Rides over Average Ride Time
 
@@ -717,25 +697,28 @@ The distribution is still skewed right, but the time it takes to complete a bike
 # Number of rides over average time sin weather effects
 ride_num <- total_data %>%
   filter(tripduration > trip_duration_stats[1,3]) %>%
-  count()
-ride_num[1,1]
+  summarise(num_rides = n())
+ride_num
 
 # Number of rides over average time with rain
 rain_num <- total_data %>%
   filter(SNOW == 0, PRCP > 0, tripduration > trip_duration_stats[1,3]) %>%
-  count()
-rain_num[1,1]
+  summarise(num_rides_greater_avg_rain = n())
+rain_num
 
 # Number of rides over average time with snow
 snow_num <- total_data %>%
   filter(SNOW > 0, tripduration > trip_duration_stats[1,3]) %>%
-  count()
-snow_num[1,1]
+  summarise(num_rides_greater_avg_snow = n())
+snow_num
 
 # Number of rides over average time with wind
 wind_num <- total_data %>%
   filter(AWND > 0, tripduration > trip_duration_stats[1,3]) %>%
-  count()
-wind_num[1,1]
-```
+  summarise(num_rides_greater_avg_wind = n())
+wind_num
 
+
+cbind(ride_num, rain_num, snow_num, wind_num)
+```
+Finally, this data frame allows us to better analyze the effect of the number of rides based on different weather affects. The average number of rides is greatest when the weather is windy and expectedly lowest when it is snowing. 
