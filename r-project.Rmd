@@ -1,7 +1,7 @@
 ---
 title: "r-project"
 author: "Riley Maher, Griffin Rubin, Katie Summers, Natalie Vadasz"
-date: "Dec 8, 2020"
+date: "Dec 15, 2020"
 output: 
   html_document: 
     toc: yes
@@ -70,6 +70,7 @@ rider_2019_sample$Year <- format(rider_2019_sample$DATE, "%Y")
 ```
 
 ```{r}
+# Creating columns for time
 dates <- as.POSIXct(rider_2019_sample$stoptime)
 rider_2019_sample$endtime <- format(dates, format = "%H:%M")
 ```
@@ -263,7 +264,7 @@ total_data %>%
   labs(title="Speed of Riders by Gender", x="Gender", y="Speed")
 ```
 
-From the scatter plots, we can see that all genders saw a decrease in speed as riders got older. The drop off was most steep for the Unkown gender group, but since Unknown is a mix of all genders, it's hard to make any analyses for the group. Males had a steeper decline in speed as they got older than Females, but from the box plots, we can see that Males were faster than Females on average.
+From the scatter plots, we can see that all genders saw a decrease in speed as riders got older. The drop off was most steep for the Unknown gender group, but since Unknown is a mix of all genders, it's hard to make any analyses for the group. Males had a steeper decline in speed as they got older than Females, but from the box plots, we can see that Males were faster than Females on average.
 
 ```{r}
 # Boxplot of speed by customer type
@@ -428,6 +429,9 @@ morning_map
 afternoon_map
 night_map
 ```
+
+For the end location for the Morning Riders Map, we can see the density level is pretty hot toward the middle of Manhattan; this is most likely people biking to their jobs during the early morning commute. In the Afternoon Riders
+Map, we can see that there isn't that great of a change from the morning map, indicating that people are most likely still commuting to work or are commuting to lunch near their work. For the Night Riders Map, a new hot density area appears above the original; this is most likely people commuting home after the workday.
 
 ### End Locations by User Type
 
@@ -607,18 +611,51 @@ plot_data <- total_data %>%
 plot_data %>%
   ggplot(aes(x = age, y = mean_PRCP_by_age)) +
   geom_point(alpha =0.9, shape = 18, colour = "blue", size = plot_data$mean_duration/150) +
-  geom_smooth(colour = "orange") 
+  geom_smooth(colour = "orange") +
+  ggtitle("Average Precipitation During Rides By Rider Age") +
+  xlab("Rider Age") +
+  ylab("Mean Rain")
 ```
+
+This plot indicates that as rider age increase, the average PRCP during their rides also increases. For ages 40 through 60 however, there is no increse in average PRCP per ride with age. This plot may show that older riders are generally more willing to take rides where the precipitation is greater than younger riders are up to age 65. Data on average PRCP for rides where the rider is over 65-80 years old is sporadic with several outliers. 
 
 ### Average Wind by Age
 
 ```{r}
-# Mean Wind by Age of Rider
-total_data %>% 
+plot_data2 <- total_data %>% 
   group_by(age) %>%
-  summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE)) %>%
-  ggplot(aes(x = age, y = mean_AWND_by_age)) + geom_line() + geom_smooth() 
+   summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE),
+            mean_duration = mean(tripduration)) 
+
+plot_data2 %>%
+  ggplot(aes(x = age, y = mean_AWND_by_age)) +
+  geom_point(alpha =0.9, shape = 18, colour = "cyan3", size = plot_data2$mean_duration/150) +
+  geom_smooth(colour = "orange") +
+  ggtitle("Average Wind During Rides By Rider Age") +
+  xlab("Rider Age") +
+  ylab("Mean Wind")
 ```
+
+Average wind for rides does not vary much with rider age. The mean wind for rides where the rider is 20 is the same for riders who are 60. However, there is a small dip is average wind for riders aged 25-35 of 0.5 MPH. On more windy days this age group is less willing to use citibike. 
+
+## Average Snow by Age
+
+```{r}
+plot_data3 <- total_data %>% 
+  group_by(age) %>%
+   summarise(mean_SNOW_by_age = mean(SNOW,na.rm = TRUE),
+            mean_duration = mean(tripduration)) 
+
+plot_data3 %>%
+  ggplot(aes(x = age, y = mean_SNOW_by_age)) +
+  geom_point(alpha =0.9, shape = 18, colour = "deepskyblue", size = plot_data3$mean_duration/150) +
+  geom_smooth(colour = "orange") +
+  ggtitle("Average Snow During Rides By Rider Age") +
+  xlab("Rider Age") +
+  ylab("Mean Snow")
+```
+
+Average snow during rides increases with rider age, although by a small degree of less than 0.01 inches across the 64 ages analyzed. Similar to precipitation data on each age group, the snow data indicates that snow is less of a deterrent to older demographics than it is to younger riders.
 
 ## Rain Effects on Trip Duration
 
@@ -636,7 +673,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Rain", x="Trip Duration", y="Count")
 ```
 
-The distribution is skewed left in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
+The distribution is skewed right in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
 
 ### Snow Effects on Trip Duration
 
@@ -654,7 +691,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Snow", x="Trip Duration", y="Count")
 ```
 
-The distribution is still skewed left, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
+The distribution is still skewed right, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
 
 ### Wind Effects on Trip Duration
 
@@ -672,7 +709,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Wind", x="Trip Duration", y="Count")
 ```
 
-The distribution is still skewed left, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
+The distribution is still skewed right, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
 
 ### Weather Effects on Number of Rides over Average Ride Time
 
