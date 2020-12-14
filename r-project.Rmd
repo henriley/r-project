@@ -245,7 +245,7 @@ total_data %>%
   ggplot(aes(x = age, y = speed, colour = gender)) +
   geom_point(alpha = .4, size = 1.5) +
   scale_colour_manual(name = 'Gender',
-                      values = setNames(c('blue','magenta', 'dark green'),
+                      values = setNames(c('dark green','magenta', 'blue'),
                                         c('Male', 'Female', 'Unknown'))) +
   geom_smooth(method='lm', colour = 'black') +
   facet_wrap(~gender)  + # make a plot per gender. look up facet_wrap for other fun ways to do this 
@@ -258,7 +258,7 @@ total_data %>%
   ggplot(aes(x = gender, y = speed, colour = gender)) +
   geom_boxplot(outlier.colour = 'red') +
   scale_colour_manual(name = 'Gender',
-                      values = setNames(c('blue','magenta', 'dark green'),
+                      values = setNames(c('dark green','magenta', 'blue'),
                                         c('Male', 'Female', 'Unknown'))) +
   labs(title="Speed of Riders by Gender", x="Gender", y="Speed")
 ```
@@ -368,7 +368,7 @@ ggmap(start) +
   labs(title = "Start Location by Trip Duration One SD Below Mean")
 ```
 
-These graphs allow us to pinpoint how long riders are riding for depending on their start location. The edges of the city tend to have higher red dots for the trip duration one SD below the mean and the inner part of the city has higher red dots for th trip duration one SD above the mean; this could show that people who are on the outskirts of the city don't have to travel as far as those in the heart of the city.
+These graphs allow us to pinpoint how long riders are riding for depending on their start location. The edges of the city tend to have higher red dots for the trip duration one SD below the mean and the inner part of the city has higher red dots for the trip duration one SD above the mean; this could show that people who are on the outskirts of the city don't have to travel as far as those in the heart of the city.
 
 ### End Location Preferences
 
