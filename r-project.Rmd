@@ -1,7 +1,7 @@
 ---
 title: "r-project"
 author: "Riley Maher, Griffin Rubin, Katie Summers, Natalie Vadasz"
-date: "Dec 8, 2020"
+date: "Dec 15, 2020"
 output: 
   html_document: 
     toc: yes
@@ -70,11 +70,10 @@ rider_2019_sample$Year <- format(rider_2019_sample$DATE, "%Y")
 ```
 
 ```{r}
+# Creating columns for time
 dates <- as.POSIXct(rider_2019_sample$stoptime)
 rider_2019_sample$endtime <- format(dates, format = "%H:%M")
 ```
-Here we were able to adjust the datasets to ensure that we could splitthe data up by a number of different variable to allow us to look at rider data over the course of a numberof different weather types, dates and times. 
-
 
 ### Rider Age
 
@@ -114,8 +113,6 @@ edited_rider <- select(rider_2019_sample,
 total_data = merge(edited_weather, edited_rider, by.x="DATE", by.y="DATE", all.x=TRUE)
 head(total_data)
 ```
-Using edited data sets allows us to more closely analyze 4 specific weather types along with specific rider variables. 
-
 
 ### Distance Between Stations
 
@@ -129,8 +126,6 @@ total_data <- mutate(total_data,
 total_data <- filter(total_data, tripduration <= 3600)
 head(total_data)
 ```
-This data frame allows for us to successfully compare trip duration to the other varying data variables we defined above and adding it to an updated dataframe. 
-
 
 ## 1. Initial Data Analysis
 
@@ -221,15 +216,8 @@ cust_ride <- total_data %>%
   filter(usertype == "Subscriber") %>%
   summarise(subscriber_average = mean(speed))
 
-cbind(all_ride, 
-young_ride, 
-old_ride, 
-fem_ride, 
-male_ride, 
-sub_ride, 
-cust_ride)
+cbind(all_ride, young_ride, old_ride, fem_ride, male_ride, sub_ride, cust_ride)
 ```
-By combining all of our variables into one dataframe here, we can compare speeds based on different classification of customers. Here we can see that the average speed of any bike rider is 2.462 with young riders averaging above this along wth male riders. The subscriber average is also significantly higher than customer average.  
 
 ### Speed of Riders Affected by Weather
 
@@ -251,7 +239,6 @@ wind_speed <- total_data %>%
 
 cbind(rain_speed, snow_speed, wind_speed)
 ```
-Combining this data into one datafram allows us to see that wind affects bike speed more than rain or snow. Interestingly enough, snow actually still maintains the fastest speed for bikers at 2.5
 
 ```{r}
 # Scatter Plot of speed by age
@@ -259,7 +246,7 @@ total_data %>%
   ggplot(aes(x = age, y = speed, colour = gender)) +
   geom_point(alpha = .4, size = 1.5) +
   scale_colour_manual(name = 'Gender',
-                      values = setNames(c('blue','magenta', 'dark green'),
+                      values = setNames(c('dark green','magenta', 'blue'),
                                         c('Male', 'Female', 'Unknown'))) +
   geom_smooth(method='lm', colour = 'black') +
   facet_wrap(~gender)  + # make a plot per gender. look up facet_wrap for other fun ways to do this 
@@ -272,12 +259,12 @@ total_data %>%
   ggplot(aes(x = gender, y = speed, colour = gender)) +
   geom_boxplot(outlier.colour = 'red') +
   scale_colour_manual(name = 'Gender',
-                      values = setNames(c('blue','magenta', 'dark green'),
+                      values = setNames(c('dark green','magenta', 'blue'),
                                         c('Male', 'Female', 'Unknown'))) +
   labs(title="Speed of Riders by Gender", x="Gender", y="Speed")
 ```
 
-From the scatter plots, we can see that all genders saw a decrease in speed as riders got older. The drop off was most steep for the Unkown gender group, but since Unknown is a mix of all genders, it's hard to make any analyses for the group. Males had a steeper decline in speed as they got older than Females, but from the box plots, we can see that Males were faster than Females on average.
+From the scatter plots, we can see that all genders saw a decrease in speed as riders got older. The drop off was most steep for the Unknown gender group, but since Unknown is a mix of all genders, it's hard to make any analyses for the group. Males had a steeper decline in speed as they got older than Females, but from the box plots, we can see that Males were faster than Females on average.
 
 ```{r}
 # Boxplot of speed by customer type
@@ -382,7 +369,7 @@ ggmap(start) +
   labs(title = "Start Location by Trip Duration One SD Below Mean")
 ```
 
-These graphs allow us to pinpoint how long riders are riding for depending on their start location. The edges of the city tend to have higher red dots for the trip duration one SD below the mean and the inner part of the city has higher red dots for th trip duration one SD above the mean; this could show that people who are on the outskirts of the city don't have to travel as far as those in the heart of the city.
+These graphs allow us to pinpoint how long riders are riding for depending on their start location. The edges of the city tend to have higher red dots for the trip duration one SD below the mean and the inner part of the city has higher red dots for the trip duration one SD above the mean; this could show that people who are on the outskirts of the city don't have to travel as far as those in the heart of the city.
 
 ### End Location Preferences
 
@@ -442,6 +429,9 @@ morning_map
 afternoon_map
 night_map
 ```
+
+For the end location for the Morning Riders Map, we can see the density level is pretty hot toward the middle of Manhattan; this is most likely people biking to their jobs during the early morning commute. In the Afternoon Riders
+Map, we can see that there isn't that great of a change from the morning map, indicating that people are most likely still commuting to work or are commuting to lunch near their work. For the Night Riders Map, a new hot density area appears above the original; this is most likely people commuting home after the workday.
 
 ### End Locations by User Type
 
@@ -592,7 +582,6 @@ total_data %>%
   group_by(Month) %>% 
   summarise(average_rain = mean(PRCP, na.rm = TRUE))
 ```
-This chart allows us to see that April, May, June and July average the highest amounts of rain. This data falls in line with spring/early summer seasons. December actually garners the most rain per month in NY which is an interesting insight to consider since December is normally more closely associated with snow rather than rain. 
 
 ```{r}
 # Average snow per month
@@ -600,7 +589,6 @@ total_data %>%
   group_by(Month) %>% 
   summarise(average_snow = mean(SNOW, na.rm = TRUE))
 ```
-This chart demonstrates that March actually garners the highest average of snowfall aligning with a late winter snow pileup. 
 
 ```{r}
 # Average wind speed per month
@@ -609,7 +597,6 @@ total_data %>%
   summarise(average_wind_speed = mean(AWND, na.rm = TRUE))
 # mean returns NaN if all values in group (ex: jan and feb) are NA
 ```
-October, November, and December have the highest average wind speeds which aligns with the late fall/early winter months as the weather starts to become colder. 
 
 ### Average Rain by Age
 
@@ -624,18 +611,264 @@ plot_data <- total_data %>%
 plot_data %>%
   ggplot(aes(x = age, y = mean_PRCP_by_age)) +
   geom_point(alpha =0.9, shape = 18, colour = "blue", size = plot_data$mean_duration/150) +
-  geom_smooth(colour = "orange") 
+  geom_smooth(colour = "orange") +
+  ggtitle("Average Precipitation During Rides By Rider Age") +
+  xlab("Rider Age") +
+  ylab("Mean Rain")
 ```
+
+This plot indicates that as rider age increase, the average PRCP during their rides also increases. For ages 40 through 60 however, there is no increse in average PRCP per ride with age. This plot may show that older riders are generally more willing to take rides where the precipitation is greater than younger riders are up to age 65. Data on average PRCP for rides where the rider is over 65-80 years old is sporadic with several outliers. 
 
 ### Average Wind by Age
 
 ```{r}
-# Mean Wind by Age of Rider
-total_data %>% 
+plot_data2 <- total_data %>% 
   group_by(age) %>%
-  summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE)) %>%
-  ggplot(aes(x = age, y = mean_AWND_by_age)) + geom_line() + geom_smooth() 
+   summarise(mean_AWND_by_age = mean(AWND,na.rm = TRUE),
+            mean_duration = mean(tripduration)) 
+
+plot_data2 %>%
+  ggplot(aes(x = age, y = mean_AWND_by_age)) +
+  geom_point(alpha =0.9, shape = 18, colour = "cyan3", size = plot_data2$mean_duration/150) +
+  geom_smooth(colour = "orange") +
+  ggtitle("Average Wind During Rides By Rider Age") +
+  xlab("Rider Age") +
+  ylab("Mean Wind")
 ```
+
+Average wind for rides does not vary much with rider age. The mean wind for rides where the rider is 20 is the same for riders who are 60. However, there is a small dip is average wind for riders aged 25-35 of 0.5 MPH. On more windy days this age group is less willing to use citibike. 
+
+## Average Snow by Age
+
+```{r}
+plot_data3 <- total_data %>% 
+  group_by(age) %>%
+   summarise(mean_SNOW_by_age = mean(SNOW,na.rm = TRUE),
+            mean_duration = mean(tripduration)) 
+
+plot_data3 %>%
+  ggplot(aes(x = age, y = mean_SNOW_by_age)) +
+  geom_point(alpha =0.9, shape = 18, colour = "deepskyblue", size = plot_data3$mean_duration/150) +
+  geom_smooth(colour = "orange") +
+  ggtitle("Average Snow During Rides By Rider Age") +
+  xlab("Rider Age") +
+  ylab("Mean Snow")
+```
+
+Average snow during rides increases with rider age, although by a small degree of less than 0.01 inches across the 64 ages analyzed. Similar to precipitation data on each age group, the snow data indicates that snow is less of a deterrent to older demographics than it is to younger riders.
+
+## Station locations by most Asymmetric when Rain > 0.3747275
+
+```{r}
+big_rain_data <- total_data %>% filter(total_data$PRCP > (0.3747275), SNOW == 0)
+rain_locations <- subset(big_rain_data,
+                         select=c("start.station.longitude",
+                                  "start.station.latitude",
+                                  "start.station.name"))
+
+names(rain_locations) = c("long",
+                          "lat",
+                          "station")
+
+count_starts = as.data.frame(table(big_rain_data$start.station.name),
+                             na.rm=TRUE)
+
+names(count_starts) = c("station",
+                        "starts")
+
+count_begins = as.data.frame(merge(count_starts,
+                                   rain_locations,
+                                   by.x = "station",
+                                   by.y = "station",
+                                   all.x=TRUE,
+                                   all.y = TRUE,
+                                   na.rm=TRUE))
+
+count_ends = as.data.frame(table(big_rain_data$end.station.name),
+                           na.rm=TRUE)
+
+names(count_ends) = c("station",
+                      "ends")
+
+station_flow = as.data.frame(merge(count_begins,
+                                   count_ends,
+                                   by.x="station",
+                                   by.y="station",
+                                   all.x=TRUE,
+                                   all.y = TRUE,
+                                   na.rm=TRUE))
+
+station_flow$net = station_flow$starts / station_flow$ends
+station_flow = na.omit(station_flow)
+distinct_data <- station_flow[!(duplicated(station_flow$station)), ]
+
+# Station locations with Net Asymmetric Traffic <0.75, with Rain >0.3747275
+extra_bikes_rain <- distinct_data %>% filter(distinct_data$net < 0.75)
+lost_bikes_rain <- distinct_data %>% filter(distinct_data$net > 1.25)
+bikes_rain_map <- ggmap(start,
+                        extent = "device",
+                        legend = "topright")
+
+# Location of Stations with Significantly Positive Asymmetric Traffic during High PRCP days
+# below 0.75 Asymmetric Traffic
+bikes_rain_map + geom_point(data = extra_bikes_rain,
+                            aes(x = extra_bikes_rain$long,
+                                y = extra_bikes_rain$lat),
+                            colour = "deepskyblue") +
+  ggtitle("Most Crowded Stations on High PRCP Days")
+
+# Location of Stations with over 1.25 Asymmetric Traffic during High PRCP days
+# More bikes taken than returned in high PRCP
+bikes_rain_map + geom_point(data = lost_bikes_rain,
+                            aes(x = lost_bikes_rain$long,
+                                y = lost_bikes_rain$lat), colour = "deepskyblue") +
+  ggtitle("Most Empty Stations on High PRCP Days")
+```
+The first map shows the locations of the stations that had significantly more bikes returned than were taken out across all days with more than 1 standard deviation above the mean worth of precipitation, or across all days with greater than 0.3747275 inches of PRCP. Rented bikes at these stations are at most a ratio of 0.75 what the returned biked count during rainy days was.
+
+The second map shows the locations of stations that had many more bikes taken than returned during highly snowy days.Rented bikes are at least 1.25 times greater than returned bikes at all of these stations and wind levels are the same greater than 0.3747275 inches of PRCP as the previous map.
+
+These maps show the same general neighborhoods where stations are overcrowded that they are empty on days with high rain, indicating a risk adjusted system to cover for overcrowded stations on rainy days with empty ones nearby. However, this system may need to be rolled back as there are several station in eastern Brooklyn neighborhoods that are that have no overcrowded stations nearby on days with the same PRCP levels. 
+
+## Station locations by most Asymmetric when SNOW > 0.21624501
+
+```{r}
+big_snow_data <- total_data %>% filter(total_data$SNOW > (0.21624501))
+snow_locations <- subset(big_snow_data, select=c("start.station.longitude",
+                                                 "start.station.latitude",
+                                                 "start.station.name"))
+
+names(snow_locations) = c("long",
+                          "lat",
+                          "station")
+
+count_starts = as.data.frame(table(big_snow_data$start.station.name),
+                             na.rm=TRUE)
+
+names(count_starts) = c("station",
+                        "starts")
+
+count_begins = as.data.frame(merge(count_starts,
+                                   snow_locations,
+                                   by.x = "station",
+                                   by.y = "station",
+                                   all.x=TRUE,
+                                   all.y = TRUE,
+                                   na.rm=TRUE))
+
+count_ends = as.data.frame(table(big_snow_data$end.station.name),
+                           na.rm=TRUE)
+
+names(count_ends) = c("station",
+                      "ends")
+
+station_flow = as.data.frame(merge(count_begins,
+                                   count_ends,
+                                   by.x="station",
+                                   by.y="station",
+                                   all.x=TRUE,
+                                   all.y = TRUE,
+                                   na.rm=TRUE))
+
+station_flow$net = station_flow$starts / station_flow$ends
+station_flow = na.omit(station_flow)
+distinct_data <- station_flow[!(duplicated(station_flow$station)), ]
+
+
+extra_bikes_snow <- distinct_data %>% filter(distinct_data$net < 0.75)
+lost_bikes_snow <- distinct_data %>% filter(distinct_data$net > 1.25)
+bikes_snow_map <- ggmap(start, extent = "device", legend = "topright")
+
+# Location of Stations with Significantly Positive Asymmetric Traffic during High Snow days
+# below 0.75 Asymmetric Traffic
+bikes_snow_map + geom_point(data = extra_bikes_snow,
+                            aes(x = extra_bikes_snow$long,
+                                y = extra_bikes_snow$lat),
+                            colour = "cyan") +
+  ggtitle("Most Crowded Stations on High Snow Days")
+
+# Location of Stations with over 1.25 Asymmetric Traffic during High Snow days
+# More bikes taken than returned in high Snow
+bikes_snow_map + geom_point(data = lost_bikes_snow,
+                            aes(x = lost_bikes_snow$long, 
+                                y = lost_bikes_snow$lat),
+                            colour = "cyan") +
+  ggtitle("Most Empty Stations on High Snow Days")
+```
+The first map shows the locations of the stations that had significantly more bikes returned than were taken out across all days with more than 1 standard deviation above the mean worth of snow, or across all days with greater than 0.21624501 inches of snow. Rented bikes at these stations are at most a ratio of 0.75 what the returned biked count during snowy days was.
+
+The second map shows the locations of stations that had many more bikes taken than returned during highly snowy days.Rented bikes are at least 1.25 times greater than returned bikes at all of these stations and wind levels are the same greater than 0.21624501 inches of snow as the previous map.
+
+The same trend can be observed in these maps as in the high PRCP, high asymmetry maps above. Most of the overcrowded stations are surrounded by emptier stations to cover for customers trying to return bikes. However, these maps also follow a trend of the deep areas in east Brooklyn have many empty stations. The reason for many emptier staions being loccated in these areas during both high PRCP and high snow days may be the remote location of these stations in relation to major hubs of the city. Riders who are initially willing to ride through these types of streets and these distances at earlier points of the day may not be willing to return via citibike to east Brooklyn. These streets are ore residential and less likely to be as well kept and prioritized by the city. In addition, the later in the day the darker it may be and the more snowy or wet the street may be. 
+
+## Station locations by most Asymmetric when AWND > 6.383933
+
+```{r}
+big_wind_data <- total_data %>% filter(total_data$AWND > (6.383933))
+wind_locations <- subset(big_wind_data, select=c("start.station.longitude",
+                                                 "start.station.latitude",
+                                                 "start.station.name"))
+
+names(wind_locations) = c("long",
+                          "lat",
+                          "station")
+
+count_starts = as.data.frame(table(big_wind_data$start.station.name),
+                             na.rm=TRUE)
+
+names(count_starts) = c("station",
+                        "starts")
+
+count_begins = as.data.frame(merge(count_starts,
+                                   wind_locations,
+                                   by.x = "station",
+                                   by.y = "station",
+                                   all.x=TRUE,
+                                   all.y = TRUE,
+                                   na.rm=TRUE))
+
+count_ends = as.data.frame(table(big_wind_data$end.station.name),
+                           na.rm=TRUE)
+
+names(count_ends) = c("station",
+                      "ends")
+
+station_flow = as.data.frame(merge(count_begins,
+                                   count_ends,
+                                   by.x="station",
+                                   by.y="station",
+                                   all.x=TRUE,
+                                   all.y = TRUE,
+                                   na.rm=TRUE))
+
+station_flow$net = station_flow$starts / station_flow$ends
+station_flow = na.omit(station_flow)
+distinct_data <- station_flow[!(duplicated(station_flow$station)), ]
+
+
+extra_bikes_wind <- distinct_data %>% filter(distinct_data$net < 0.75)
+lost_bikes_wind <- distinct_data %>% filter(distinct_data$net > 1.25)
+bikes_wind_map <- ggmap(start, extent = "device", legend = "topright")
+
+# Location of Stations with Significantly Positive Asymmetric Traffic during high wind days
+# below 0.75 Asymmetric Traffic
+bikes_wind_map + geom_point(data = extra_bikes_wind,
+                            aes(x = extra_bikes_wind$long,
+                                y = extra_bikes_wind$lat),
+                            colour = "darkorchid1")+
+  ggtitle("Most Crowded Stations on High Wind Days")
+
+# Location of Stations with over 1.25 Asymmetric Traffic during High Snow days
+# More bikes taken than returned in high wind
+bikes_wind_map + geom_point(data = lost_bikes_wind,
+                            aes(x = lost_bikes_wind$long,
+                                y = lost_bikes_wind$lat),
+                            colour = "darkorchid1") +
+  ggtitle("Most Empty Stations on High Wind Days")
+```
+The first map shows the locations of the stations that had significantly more bikes returned than were taken out across all days with more than 1 standard deviation above the mean worth of wind speed, or across all days with greater than 6.383933 miles per hour. Rented bikes at these stations are at most a ratio of 0.75 what the returned biked count during windy days was. It shows where positive asymmetric traffic is concentrated on days with a high level of wind. Most of these stations are located in Brooklyn and Queens, rather than Manhattan. It is clear than most of the stations that may face an issue with overcrowding on windy days are in the Myrtle area of Brooklyn and western Queens stations. 
+
+The second map shows the locations of stations that had many more bikes taken than returned during highly windy days.Rented bikes are at least 1.25 times greater than returned bikes at all of these stations and wind levels are the same greater than 6.383933 miles per hour as the previous map. This map shows a few more stations popping up in the Upper East and Upper West Sides of Manhattan as well as a shift even further west of the western stations in Queens observed in the previous map. Most significantly different in this map is the increase in the number of stations in same Brooklyn neighborhood. Since there is already a large number of close stations that are overcrowded close by in both Brooklyn and Queens neighborhoods, it could be concluded that keeping these more empty stations avaliable close are for customers who run into an overcrowded station.
 
 ## Rain Effects on Trip Duration
 
@@ -653,7 +886,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Rain", x="Trip Duration", y="Count")
 ```
 
-The distribution is skewed left in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
+The distribution is skewed right in this graph. This makes sense as people will not want to be out in the rain long while riding their bike.
 
 ### Snow Effects on Trip Duration
 
@@ -671,7 +904,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Snow", x="Trip Duration", y="Count")
 ```
 
-The distribution is still skewed left, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
+The distribution is still skewed right, but we can see that even more bike rides are shorter because fewer people want to be riding a bike in the snow.
 
 ### Wind Effects on Trip Duration
 
@@ -689,7 +922,7 @@ total_data %>%
   labs(title="Histogram of Rider Time Affected by Wind", x="Trip Duration", y="Count")
 ```
 
-The distribution is still skewed left, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
+The distribution is still skewed right, but the time it takes to complete a bike ride has actually gone up. This may be because the wind doesn't deter them from riding bikes, but it does increase their ride time from the wind slowing them down.
 
 ### Weather Effects on Number of Rides over Average Ride Time
 
@@ -697,28 +930,25 @@ The distribution is still skewed left, but the time it takes to complete a bike 
 # Number of rides over average time sin weather effects
 ride_num <- total_data %>%
   filter(tripduration > trip_duration_stats[1,3]) %>%
-  summarise(num_rides = n())
-ride_num
+  count()
+ride_num[1,1]
 
 # Number of rides over average time with rain
 rain_num <- total_data %>%
   filter(SNOW == 0, PRCP > 0, tripduration > trip_duration_stats[1,3]) %>%
-  summarise(num_rides_greater_avg_rain = n())
-rain_num
+  count()
+rain_num[1,1]
 
 # Number of rides over average time with snow
 snow_num <- total_data %>%
   filter(SNOW > 0, tripduration > trip_duration_stats[1,3]) %>%
-  summarise(num_rides_greater_avg_snow = n())
-snow_num
+  count()
+snow_num[1,1]
 
 # Number of rides over average time with wind
 wind_num <- total_data %>%
   filter(AWND > 0, tripduration > trip_duration_stats[1,3]) %>%
-  summarise(num_rides_greater_avg_wind = n())
-wind_num
-
-
-cbind(ride_num, rain_num, snow_num, wind_num)
+  count()
+wind_num[1,1]
 ```
-Finally, this data frame allows us to better analyze the effect of the number of rides based on different weather affects. The average number of rides is greatest when the weather is windy and expectedly lowest when it is snowing. 
+
