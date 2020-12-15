@@ -638,7 +638,7 @@ plot_data2 %>%
 
 Average wind for rides does not vary much with rider age. The mean wind for rides where the rider is 20 is the same for riders who are 60. However, there is a small dip is average wind for riders aged 25-35 of 0.5 MPH. On more windy days this age group is less willing to use citibike. 
 
-## Average Snow by Age
+### Average Snow by Age
 
 ```{r}
 plot_data3 <- total_data %>% 
@@ -657,7 +657,7 @@ plot_data3 %>%
 
 Average snow during rides increases with rider age, although by a small degree of less than 0.01 inches across the 64 ages analyzed. Similar to precipitation data on each age group, the snow data indicates that snow is less of a deterrent to older demographics than it is to younger riders.
 
-## Station locations by most Asymmetric when Rain > 0.3747275
+### Station locations by most Asymmetric when Rain > 0.3747275
 
 ```{r}
 big_rain_data <- total_data %>% filter(total_data$PRCP > (0.3747275), SNOW == 0)
@@ -730,7 +730,7 @@ The second map shows the locations of stations that had many more bikes taken th
 
 These maps show the same general neighborhoods where stations are overcrowded that they are empty on days with high rain, indicating a risk adjusted system to cover for overcrowded stations on rainy days with empty ones nearby. However, this system may need to be rolled back as there are several station in eastern Brooklyn neighborhoods that are that have no overcrowded stations nearby on days with the same PRCP levels. 
 
-## Station locations by most Asymmetric when SNOW > 0.21624501
+### Station locations by most Asymmetric when SNOW > 0.21624501
 
 ```{r}
 big_snow_data <- total_data %>% filter(total_data$SNOW > (0.21624501))
@@ -801,7 +801,7 @@ The second map shows the locations of stations that had many more bikes taken th
 
 The same trend can be observed in these maps as in the high PRCP, high asymmetry maps above. Most of the overcrowded stations are surrounded by emptier stations to cover for customers trying to return bikes. However, these maps also follow a trend of the deep areas in east Brooklyn have many empty stations. The reason for many emptier staions being loccated in these areas during both high PRCP and high snow days may be the remote location of these stations in relation to major hubs of the city. Riders who are initially willing to ride through these types of streets and these distances at earlier points of the day may not be willing to return via citibike to east Brooklyn. These streets are ore residential and less likely to be as well kept and prioritized by the city. In addition, the later in the day the darker it may be and the more snowy or wet the street may be. 
 
-## Station locations by most Asymmetric when AWND > 6.383933
+### Station locations by most Asymmetric when AWND > 6.383933
 
 ```{r}
 big_wind_data <- total_data %>% filter(total_data$AWND > (6.383933))
@@ -870,7 +870,7 @@ The first map shows the locations of the stations that had significantly more bi
 
 The second map shows the locations of stations that had many more bikes taken than returned during highly windy days.Rented bikes are at least 1.25 times greater than returned bikes at all of these stations and wind levels are the same greater than 6.383933 miles per hour as the previous map. This map shows a few more stations popping up in the Upper East and Upper West Sides of Manhattan as well as a shift even further west of the western stations in Queens observed in the previous map. Most significantly different in this map is the increase in the number of stations in same Brooklyn neighborhood. Since there is already a large number of close stations that are overcrowded close by in both Brooklyn and Queens neighborhoods, it could be concluded that keeping these more empty stations avaliable close are for customers who run into an overcrowded station.
 
-## Rain Effects on Trip Duration
+### Rain Effects on Trip Duration
 
 ```{r}
 # Average ride time when it's raining
